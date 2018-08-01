@@ -1,8 +1,16 @@
-package main
+// Go 语言结构
+package main // 定义包名，放在程序最前面。package main表示一个可独立执行的程序。每个 Go 应用程序都包含一个名为 main 的包。
 
-import "fmt"
+import "fmt" // 引入包fmt；fmt 包实现了格式化 IO（输入/输出）的函数。
 
-func main() {
-
-    fmt.Println("Hello, World!")
+func main() { // main 程序开始执行的函数，启动后第一个执行的函数（如果有 init() 函数则会先执行该函数）
+    /* 这是我的第一个简单的go程序
+       这里也是多行注释*/
+    fmt.Println("Hello, World!") // 这个是单行注释。字符串只能用双引号（"）括起来
+    // fmt.Println将字符串输出到控制台，并在最后自动增加换行字符\n；使用 fmt.Print("hello, world\n") 可以得到相同的结果。
 }
+// 运行go run hello.go，会在控制台打印Hello, World!
+/*
+ 当标识符（包括常量、变量、类型、函数名、结构字段等等）以一个大写字母开头，如：Group1，那么使用这种形式的标识符的对象就可以被外部包的代码所使用（客户端程序需要先导入这个包），
+这被称为导出（像面向对象语言中的 public）；标识符如果以小写字母开头，则对包外是不可见的，但是他们在整个包的内部是可见并且可用的（像面向对象语言中的 private ）
+*/
