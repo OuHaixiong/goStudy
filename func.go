@@ -1,3 +1,4 @@
+// Go 函数
 package main;
 
 import "fmt"
@@ -9,9 +10,9 @@ func Version4ToInt(version string) int {
   fix_data := 100000000
   ver := 0
   for _, num := range arr {
-    //d, error := strconv.Atoi(num) // error declared and not used（error不能用来做标识符）
-	d, _error := strconv.Atoi(num) // 字符串转整型
-    if _error != nil { // 单个_表示不接受参数，且_不能用来作为变量（cannot use _ as value）
+    //d, error := strconv.Atoi(num) // error declared and not used（error不能用来做标识符，但err可以）
+	d, _error := strconv.Atoi(num) // 字符串转整型（函数有两个返回值，）
+    if _error != nil { // 单个_表示不接受参数(该值被直接抛弃掉)，且_不能用来作为变量（cannot use _ as value）
 	    fmt.Println("字符串转换成整数失败")
 	}
 	ver += d*fix_data
@@ -28,3 +29,6 @@ func main() { // 如果是需要go来运行的一定不能少了main函数，除
 	// 1，打印一定需要在函数里面，不能在外面
 	// 2，打印是需要引入fmt包的，如果你不用fmt.Println而直接用println，其实是go帮你自动引入了包fmt
 }
+
+// go和php的不同：
+// go中的函数可以有两个或以上的返回值，但php中只能有一个返回值
