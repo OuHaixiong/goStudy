@@ -1,7 +1,7 @@
 // Go 变量 . Go 语言变量名由字母、数字、下划线组成，其中首个字母不能为数字
 package main
 
-var x, y int  // 未赋值的整型变量，默认为0
+var x, y int  // 未赋值的整型变量，默认为0。float32默认也是0，pointer默认nil
 var(  // 类型不同时，多个全局变量的声明，这种只能出现在全局变量中，函数体内不支持
     a int
     b bool  // 布尔型，不赋值默认为false
