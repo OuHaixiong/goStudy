@@ -27,8 +27,29 @@ func main() {
     
     number3 := numbers[2:5] // len=3 cap=8 slice=[2 3 4]
     printSlice(number3);
+    
+    print("\n");
+    
+    appendCopy();
 }
 
 func printSlice(x []int) { // int型的切片差数
     fmt.Printf("len=%d cap=%d slice=%v\n", len(x), cap(x), x);
+}
+
+func appendCopy() { // 追加和拷贝切片
+    var numbers []int;
+    printSlice(numbers);
+    numbers = append(numbers, 0); // 不能写成这样：append(numbers, 0);，会报错：append(numbers, 0) evaluated but not used
+    printSlice(numbers); // 向空的切片中追加元素
+    numbers = append(numbers, 1,2,3,4); // 向切片中添加多个元素
+    printSlice(numbers);
+    
+    num := []float32{3.14, 50.88}; // 其实非空的切片也是可以追加的，道理一样，需要扩容
+    num = append(num, 9.886);
+    fmt.Printf("float32的切片：%v \n", num);
+    
+    number1 := make([]int, len(numbers), cap(numbers) * 2); // 创建一个切片，是之前切片的两倍容量
+    copy(number1, numbers); // 将后面的切片的所有元素拷贝到前面的切片
+    printSlice(number1);
 }
