@@ -32,7 +32,7 @@ func deleteMap() { // 测试删除map中的值
         fmt.Println("Capital of", country, "is", capital);
     }
     
-    delete(countryCapitalMap, "France");
+    delete(countryCapitalMap, "France"); // delete 删除map中的一个值
     fmt.Println("Entry for France is deleted") 
     fmt.Println("删除元素后的map：");
     for country, capital := range countryCapitalMap {
