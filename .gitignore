@@ -27,3 +27,9 @@ Thumbs.db
 
 # Mac DS_Store Files
 .DS_Store
+
+# go lib & other project
+github.com
+gobaselib
+golang.org
+YBUpload

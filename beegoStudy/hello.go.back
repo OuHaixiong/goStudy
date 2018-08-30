@@ -1,0 +1,22 @@
+package main
+
+import (
+    "github.com/astaxie/beego" // 导入框架包
+)
+
+type MainController struct { // 声明一个控制器结构体
+    beego.Controller // 匿名包含了 beego.Controller，这样我们的 MainController 就拥有了 beego.Controller 的所有方法(这个就实现了继承)
+}
+// MainController 已经拥有了 Get、Post、Delete、Put 等方法，这些方法是分别用来对应用户请求的 Method 函数，如果用户发起的是 POST 请求，那么就执行 Post 函数。
+
+// 定义了 MainController 的 Get 方法用来重写继承的 Get 函数，这样当用户发起 GET 请求的时候就会执行该函数。
+func (controller *MainController) Get() { // 结构体的方法
+    controller.Ctx.WriteString("hello world欧阳海雄");
+}
+
+func main() { // 主函数，入口
+    // Router 函数的两个参数函数，第一个是路径，第二个是 Controller 的指针。
+    beego.Router("/", &MainController{}) // 路由声明（注册路由）.  &MainController{} : 声明一个MainController结构体变量并初始化成员属性（这里属性为空），最后按引用传递
+
+    beego.Run(); // 运行框架 ; Go 默认情况会监听你本机所有的 IP 上面的 8080 端口
+}
