@@ -84,7 +84,7 @@ func main() {
 	data := []byte("hell我\ngo\n"); // 字符串转二进制流
 	// err := ioutil.WriteFile("test.txt", data, 0644) // 这样写都不行，为前面声明过err变量：no new variables on left side of :=
 	e := ioutil.WriteFile("test.txt", data, 0644) 
-	// func WriteFile(filename string, data []byte, perm os.FileMode) error 写入二进制流数据入文件，写入前会清空文件。如果文件不存在则会以指定的权限创建它。
+	// func ioutil.WriteFile(filename string, data []byte, perm os.FileMode) error 写入二进制流数据入文件，写入前会清空文件。如果文件不存在则会以指定的权限创建它。
 	check(e);
 
 	// 像下面这种声明方式: f, err 虽然之前有声明过err，但是不会报错
@@ -144,6 +144,8 @@ func main() {
 	createTempDir()
 
 	createTempFile()
+
+	writeFile()
 }
 
 // 演示创建临时文件夹
@@ -187,4 +189,29 @@ func createTempFile() {
 	if err := tmpFile.Close(); err != nil { // 关闭文件对象
         log.Fatal("关闭文件句柄出错：", err)
 	}
+}
+
+// 演示写入文件
+func writeFile() {
+	file, err := os.Create("./data2") // Open a file for writing. 打开一个文件用于写入；打开文件时会清空里面的数据
+	check(err)
+	
+	defer file.Close() // 关闭文件
+
+	data := []byte{115, 111, 109, 101, 10, 97} // 声明一个二进制的切片并赋初始值； 10:\n    
+	number, err := file.Write(data) // Write ： 追加写入二进制数据
+	check(err)
+	fmt.Printf("Wrote %d bytes\n", number);
+	number, err = file.Write([]byte("临时的文件内容！！！！")) 
+
+	number, err = file.WriteString("writes\n")
+	fmt.Printf("wrote %d bytes\n", number)
+	number, err = file.WriteString("你好我也好\n") // WriteString : 追加写入字符串数据
+
+	file.Sync() // 貌似没有用，写不写都一样
+
+	writer := bufio.NewWriter(file) // 声明一个缓冲写入对象
+	number, err = writer.WriteString("buffered内容写入\n") // 写入缓冲区的字符串
+	fmt.Printf("Wrote %d bytes\n", number)
+	writer.Flush() // 清除缓冲区
 }
