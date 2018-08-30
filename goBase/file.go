@@ -11,6 +11,7 @@ import (
 	"io"
 	"bufio"
 	"path/filepath"
+	"time"
 )
 
 func check(e error) {
@@ -88,7 +89,7 @@ func main() {
 	check(e);
 
 	// 像下面这种声明方式: f, err 虽然之前有声明过err，但是不会报错
-	f, err := os.Open("test.txt"); // os.Open(filename string) 打开一个文件，返回os.File结构体和错误信息
+	f, err := os.Open("test.txt"); // func os.Open(filename string) (*File, error) 打开一个文件，返回os.File结构体和错误信息
 	check(err)
 	b1 := make([]byte, 5) // 声明一个长度为5的二进制切片（数组）
 	n1, err := f.Read(b1) // Read 从文件（句柄）中读取指定的字节数（一个字符一个字节），返回（读取到的）总字节数（整形）和错误信息
@@ -146,6 +147,26 @@ func main() {
 	createTempFile()
 
 	writeFile()
+
+	file, err := os.OpenFile("notes.txt", os.O_RDWR|os.O_CREATE, 0755);
+	// OpenFile 打开一个文件，O_CREATE，如果不存在就创建，后面是创建的权限。O_RDONLY：只读方式打开
+	if err != nil {
+		log.Fatal(err)
+	}
+	if err := file.Close(); err != nil {
+		log.Fatal(err)
+	}
+
+	filePath := "./data2"
+	startTime := time.Now() // 获取当前时间，精确到微妙（µs），1000毫秒（ms）=1s，1000µs=1ms
+	readOne(filePath)
+	endTime1 := time.Now()
+	fmt.Printf("Cost time %v\n", endTime1.Sub(startTime))
+	readTwo(filePath)
+	endTime2 := time.Now()
+	fmt.Printf("Cost time %v\n", endTime2.Sub(endTime1)) // 时间2 - 时间1
+	nowTime := time.Now().Unix() // 转为linux时间戳（1970到现在的秒数）
+	fmt.Printf("Now time %d seconds\n", nowTime)
 }
 
 // 演示创建临时文件夹
@@ -198,7 +219,8 @@ func writeFile() {
 	
 	defer file.Close() // 关闭文件
 
-	data := []byte{115, 111, 109, 101, 10, 97} // 声明一个二进制的切片并赋初始值； 10:\n    
+	data := []byte{115, 111, 109, 101, 10, 97} // 声明一个二进制的切片并赋初始值； 10:\n  
+	println("二进制数据[]byte{115, 111, 109, 101, 10, 97}打印为：", data)  
 	number, err := file.Write(data) // Write ： 追加写入二进制数据
 	check(err)
 	fmt.Printf("Wrote %d bytes\n", number);
@@ -214,4 +236,24 @@ func writeFile() {
 	number, err = writer.WriteString("buffered内容写入\n") // 写入缓冲区的字符串
 	fmt.Printf("Wrote %d bytes\n", number)
 	writer.Flush() // 清除缓冲区
+}
+
+// 下面演示两种常见的速度比较快的方式读取文件的内容
+
+func readOne(path string) string {
+	file, err := os.Open(path)
+	if (err != nil) {
+        panic(err)
+	}
+	defer file.Close()
+	bytes, err := ioutil.ReadAll(file)
+	return string(bytes)
+}
+
+func readTwo(path string) string {
+	bytes, err := ioutil.ReadFile(path)
+	if (err != nil) {
+        panic(err)
+	}
+    return string(bytes)
 }
