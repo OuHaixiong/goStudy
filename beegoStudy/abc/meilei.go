@@ -3,7 +3,8 @@ package abc
 
 import (
 	"fmt"
-	 _ "./hehe" // 这里不用包名，舍弃掉
+	//  _ "./hehe" // 这里不用包名，舍弃掉
+	 _ "beegoStudy/abc/hehe" // 使用路径时，最好用这种路径，不要使用上面那种路径
 )
 
 // const BB string = "bb" // 常量声明是全局的，也就是说整个包中的名字是需要唯一的。如果有重名是会报错的：BB redeclared in this block， previous declaration at xxx/xx.go:4:19
