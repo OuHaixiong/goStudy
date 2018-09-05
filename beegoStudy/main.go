@@ -12,6 +12,7 @@ import (
 const MM string = "main的常量";
 
 func main() {
+    // beego.LoadAppConfig("ini", "conf/app2.conf") // 加载用户自定义配置文件，默认：conf/app.conf。调用多次，可加载多个配置文件，如果后面的文件和前面的 key 冲突，那么以最新加载的为最新值
 	var str = "欧欧欧";
 	abcP.Wl(str);
 	// abc.wor(); // 这样调用是会出错的：cannot refer to unexported name abc.wor

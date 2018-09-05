@@ -20,11 +20,19 @@ func (c *UserController) Get() {
 }
 
 func (c *UserController) Test() {
-	appName := beego.AppConfig.String("appname") // 获取配置项
+	appName := beego.AppConfig.String("appname") // 获取配置项。如果获取一个并不存在的key时，或直接返回空字符串
 	runMode := beego.AppConfig.String("runmode");
 	mysqlPassword := beego.AppConfig.String("mysqlpass");
 
 	c.Ctx.WriteString(appName); // 输出字符串，html是不支持的
-	c.Ctx.WriteString(" " + mysqlPassword +" "); // 输出只能有一个参数
+	c.Ctx.WriteString(" " + mysqlPassword + " "); // 输出只能有一个参数
 	c.Ctx.WriteString(runMode);
+	beego.AppConfig.Set("appname", "无聊") // 通过程序代码修改配置项
+	c.Ctx.WriteString(beego.AppConfig.String("appname"));
+	c.Ctx.WriteString(beego.AppConfig.String("redis::mysqlpass")); // 获取段（section）中的配置
+	// c.Ctx.WriteString(beego.GetConfig("test", "logpath")); // 这写法不对
+	c.Ctx.WriteString(beego.AppConfig.String("mongodb::username"));
+
+	beego.BConfig.ServerName = "beego" // 通过beego.BConfig.xxx也可以获取和设置默认的配置项
+	c.Ctx.WriteString(beego.BConfig.ServerName);
 }
