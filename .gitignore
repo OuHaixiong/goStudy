@@ -35,4 +35,5 @@ golang.org
 YBUpload
 
 beegoStudy/routers/commentsRouter*
+beegoStudy/static/upload
 lastupdate.tmp

@@ -1,0 +1,33 @@
+
+<h3>测试表单提交数据</h3>
+
+<form action="/test/formpost" method="post">
+    <p>Message : <input type="text" name="message" /></p>
+    <p>Id : <input type="text" name="id" value="8" /></p>
+    <p>Boolean : true:<input type="radio" name="boolean" value="true" /> false:<input type="radio" name="boolean" value="false" /></p>
+    <p><input type="submit" value="Post" /></p>
+</form>
+
+<p></p>
+
+<form action="formpost" method="post">
+    <p>名字：<input name="username" type="text" /></p>
+    <p>年龄：<input name="age" type="text" /></p>
+    <!--<p>邮箱：<input name="email" type="text" /></p>-->
+    <p>邮箱：<input name="Email" type="text" /></p>
+    <p><input type="submit" value="提交" /></p>
+</form>
+
+<form action="/test/form_body" method="post" enctype="application/json">
+    <p>名字：<input name="username" type="text" /></p>
+    <p>年龄：<input name="age" type="text" /></p>
+    <!--<p>邮箱：<input name="email" type="text" /></p>-->
+    <p>邮箱：<input name="Email" type="text" /></p>
+    <p><input type="submit" value="提交" /></p>
+</form>
+
+
+<form action="/test/form_upload" method="post" enctype="multipart/form-data">
+    <p>选择文件：<input name="upload_name" type="file" /></p>
+    <p><input type="submit" value="提交" /></p>
+</form>

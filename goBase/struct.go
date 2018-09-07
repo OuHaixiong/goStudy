@@ -42,7 +42,7 @@ func printBook(book Books) { // 结构体作为参数
 }
 
 func printBook2(book *Books) { // 结构体指针
-    fmt.Printf("book title : %s\n", book.title);
+    fmt.Printf("book title : %s\n", book.title); // 指针访问结构体的属性和非指针是一样的
     fmt.Printf("book author : %s\n", book.author);
     fmt.Printf("book subject : %s\n", book.subject);
     fmt.Printf("book book_id : %d\n", book.book_id);
