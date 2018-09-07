@@ -21,7 +21,10 @@ func main() {
 	println(abcP.MM);
 	println(MM);
 	println(hehehe.MM);
-	
+
+	// beego.BConfig.WebConfig.Session.SessionOn = true // 使用session . 如果在配置文件中没有设置SessionOn的话。 如果都不设置的话是不能使用session的
+	// 目前 session 模块支持的后端引擎包括 memory、cookie、file、mysql、redis、couchbase、memcache、postgres
+
 	beego.Run()
 }
 

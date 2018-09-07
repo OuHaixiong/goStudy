@@ -62,6 +62,17 @@ func (c *TestController) Bb() { // 上面的注释是有用的，用来注册路
 
 // 测试form表单，视图文件渲染
 func (c *TestController) FormRend() { // 貌似go语言方法不区分大小写，所以如果多个单词的方法，建议用中下划线隔开(不支持中划线)
+	v := c.GetSession("refreshNumber"); // 获取session
+    if v == nil {
+		c.SetSession("refreshNumber", int(1)); // 设置session
+		c.Data["num"] = 0;
+	} else {
+		c.SetSession("refreshNumber", v.(int) + 1);
+		c.Data["num"] = v.(int)
+	}
+
+	// println("Session ID:", sess.SessionID()) // TODO 无法获取
+
     c.TplName = "testController/formRend.html"  // 模板文件默认为：testcontroller/formrend.tpl
 }
 
