@@ -13,6 +13,7 @@ go语言查找包的顺序是安装GOPATH的顺序来的，比如：
 特别注意的是设置GOPATH一定是要全局的，在当前目录中设置的是没有用的，一定需要写在/etc/profile文件下才生效
 vim /etc/profile 在最后添加一行：
 export GOPATH="/data/www/go:/data/www:/data/www/YBUpload:/root/go"
+添加完后运行：source /etc/profile
 
 
 beego的使用

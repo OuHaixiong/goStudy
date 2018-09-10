@@ -215,3 +215,9 @@ func (c *TestController) Bind() { // /test/bind.html?id=123&isok=true&ft=1.2&ol[
 
 	c.Ctx.WriteString("绑定完成！");
 }
+
+// beego.InsertFilter("/*", beego.BeforeRouter, FilterUserLogin); // 没编译成功；原因是不能在函数外，调用有返回值的函数
+
+func (c *TestController) Login() {
+	c.TplName = "testController/login.html"  // 模板文件默认为：testcontroller/formrend.tpl
+}

@@ -7,6 +7,7 @@ import (
 	"github.com/astaxie/beego"
 	"beegoStudy/abc/hehe" // 特别注意了，这里返回的包名并不是hehe，而是hehehe。
 	// 特别注意了：如果一个包被引入了多次，那么它就会初始化多少次（初始化包括：执行里面的常量、变量和init函数）
+	"github.com/astaxie/beego/context"
 )
 
 const MM string = "main的常量";
@@ -24,7 +25,19 @@ func main() {
 
 	// beego.BConfig.WebConfig.Session.SessionOn = true // 使用session . 如果在配置文件中没有设置SessionOn的话。 如果都不设置的话是不能使用session的
 	// 目前 session 模块支持的后端引擎包括 memory、cookie、file、mysql、redis、couchbase、memcache、postgres
+	
+	// 注册一个请求过滤函数，在路由之前
+	// _ = beego.InsertFilter("/*", beego.BeforeRouter, FilterUserLogin); // 丢弃掉返回值，_= 也可以不写。 特别注意了，有返回值的函数不能写在函数外
+
 
 	beego.Run()
+}
+
+// 下面演示添加过滤器
+var FilterUserLogin = func (ctx *context.Context) { // 所有没有登录的请求都跳转到login页
+	_, uid := ctx.Input.Session("uid").(int);
+	if ((!uid) && ctx.Request.RequestURI != "/login") {
+        ctx.Redirect(302, "/login");
+	}
 }
 

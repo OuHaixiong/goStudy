@@ -43,4 +43,12 @@ func init() {
 	beego.AutoRouter(&controllers.TestController{}); // 这样如果访问：/test/index 就会调用TestController的Index方法。请求的url中的方法名都会转换为小写，并且所有的后缀都可以匹配到：.html、.xml、.json
 	beego.Include(&controllers.TestController{}) // 使用注解的方式来注册路由。效果和自己通过 Router 函数注册是一样的
 	// 注意注解的方法注册路由仅在dev模式下才能进行生成，生成的路由放在/routers/commentsRouter_controllers.go文件中
+
+	// 下面的路由是演示URL构建用的
+	beego.Router("/wu/liao", &controllers.UrlController{}, "*:List")
+	beego.Router("/person/:last/:first", &controllers.UrlController{}) // 如果是get请求/person/ddd/aaa ， 将交给UrlController->Get()处理
+	beego.AutoRouter(&controllers.UrlController{}); // get:/url/index => UrlController->index()
+
+	beego.Router("/login", &controllers.TestController{}, "GET:Login") // 最后这个参数的method大小写均可。  登录页
+
 }
