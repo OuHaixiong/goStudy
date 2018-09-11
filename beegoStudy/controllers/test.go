@@ -152,14 +152,25 @@ func (c *TestController) Form_body() { // 函数名不能用中划线（-）
 	// }
 
 	body := c.Ctx.Input.RequestBody;
-	fmt.Printf("body 的类型为： %T \n", body); // []uint8
+	fmt.Printf("body 的类型为： %T \n", body); // []uint8 ： 二进制流数据
 	for k, v := range body { // 0 => 117
-		// 1 => 115
+		// 1 => 115 ...
 		println(k, "=>", v); // 看起来像二进制数据呀
 	}
+	println(string(body)); // 二进制流数组转为字符串。返回：username=%E6%AC%A7%E9%98%B3%E6%B5%B7%E9%9B%84&age=35&Email=Bear%40maimengmei.com  即 欧阳海雄、35、Bear@maimengmei.com
 
-	c.Data["json"] = map[string]interface{}{"name":"欧海雄"}; //格式化为json字符串
-	c.ServeJSON(); // 输出为json的字符串
+	// c.Data["json"] = map[string]interface{}{"name":"欧海雄"}; //格式化为json字符串
+	// 第二种直接声明：
+	type my struct {
+		name string
+		age int
+	}
+	myStruct := my{"欧阳海雄", 35};
+	println(myStruct.name);
+	println(myStruct.age);
+	c.Data["json"] = &myStruct // 这样写无法输出json
+	c.ServeJSON(); // 输出为json的字符串。 调用 ServeJSON 之后，会设置 content-type 为 application/json，然后同时把数据进行 JSON 序列化输出。
+    c.ServeJSONP(); // 调用 ServeJSONP 之后，会设置 content-type 为 application/javascript，然后同时把数据进行 JSON 序列化，然后根据请求的 callback 参数设置 jsonp 输出。
 }
 
 func (c *TestController) Form_upload() { // 测试上传文件
