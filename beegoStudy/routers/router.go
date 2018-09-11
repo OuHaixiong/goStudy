@@ -51,4 +51,5 @@ func init() {
 
 	beego.Router("/login", &controllers.TestController{}, "GET:Login") // 最后这个参数的method大小写均可。  登录页
 
+    beego.AutoRouter(&controllers.ValidateController{});
 }
