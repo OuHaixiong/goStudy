@@ -8,7 +8,9 @@ import (
 	"beegoStudy/abc/hehe" // 特别注意了，这里返回的包名并不是hehe，而是hehehe。
 	// 特别注意了：如果一个包被引入了多次，那么它就会初始化多少次（初始化包括：执行里面的常量、变量和init函数）
 	"github.com/astaxie/beego/context"
-    "github.com/astaxie/beego/logs"
+	"github.com/astaxie/beego/logs"
+	"net/http"
+	"html/template"
 )
 
 const MM string = "main的常量";
@@ -54,6 +56,10 @@ func main() {
     logs.EnableFuncCallDepth(true); // logs日志默认输出调用的文件名和文件行号；默认true：开启，false：关闭
 	logger();
 
+    // beego.ErrorHandler("404", page_not_found); // 设置自定义404处理页面。注意后面的参数是函数名，并非字符串类型
+	// beego.ErrorHandler("dbError", dbError);
+	
+
 	beego.Run()
 }
 
@@ -81,3 +87,18 @@ func logger() { // github.com/astaxie/beego/logs 的日记和 beego.XXX[Debug]�
     logs.Critical("oh, crash"); // 严重的，（紫色）
 }
 
+func page_not_found(rw http.ResponseWriter, r *http.Request) { // 定义404错误处理页面
+	// beego.Error(beego.BConfig.WebConfig.ViewsPath); // 返回：views
+	t, _ := template.New("404.html").ParseFiles(beego.BConfig.WebConfig.ViewsPath + "/404.html"); // 相对路径：views/404.html
+	data := make(map[string]interface{});
+	data["content"] = "page not found"
+	t.Execute(rw, data);
+}
+
+func dbError(rw http.ResponseWriter, r *http.Request) {
+	t, _ := template.New("dberror.html").ParseFiles(beego.BConfig.WebConfig.ViewsPath + "/dberror.html");
+	data := make(map[string]interface{});
+	data["content"] = "database is now down";
+	// beego.Info(data["content"]);
+	t.Execute(rw, data);
+}

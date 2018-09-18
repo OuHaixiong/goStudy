@@ -51,5 +51,11 @@ func init() {
 
 	beego.Router("/login", &controllers.TestController{}, "GET:Login") // 最后这个参数的method大小写均可。  登录页
 
-    beego.AutoRouter(&controllers.ValidateController{});
+	beego.AutoRouter(&controllers.ValidateController{});
+	beego.Router("/validate/", &controllers.ValidateController{}); // 当同时设置了AutoRouter和Router时，并不矛盾，会优先查找Router中的路由，查不到时才会自动寻找（AutoRouter）
+	// 上面的路由/validate/后面的“/”有没有均可，并且都会匹配url： http://172.17.10.253:8080/validate/ 和 http://172.17.10.253:8080/validate
+
+    beego.ErrorController(&controllers.ErrorController{}); // 注册错误处理控制器
+
+
 }

@@ -232,3 +232,12 @@ func (c *TestController) Bind() { // /test/bind.html?id=123&isok=true&ft=1.2&ol[
 func (c *TestController) Login() {
 	c.TplName = "testController/login.html"  // 模板文件默认为：testcontroller/formrend.tpl
 }
+
+func (c *TestController) Test_redirect() { // 测试错误处理
+	// c.Redirect("/test/formrend", 302); // 302：临时跳转
+	// c.Abort("401"); // 终止请求，并抛401错误，之后的代码不会再执行。并显示默认的401页面
+	// c.Abort("dbError");
+	// c.Abort("501");
+	c.Abort("Db"); // 遇到错误后，跳转到错误处理页面
+	c.TplName = "testController/login.html";
+}
