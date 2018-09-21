@@ -11,11 +11,14 @@ import (
 	"github.com/astaxie/beego/logs"
 	"net/http"
 	"html/template"
+	"github.com/astaxie/beego/orm";
+    _ "github.com/lib/pq";  // 当需要使用postgresql数据库时，需要加载该包（驱动）
 )
 
 const MM string = "main的常量";
 
-func main() {
+func main() { // main中的程序也是在应用启动时执行一次
+    orm.Debug = true // 是否开启打印sql，默认false：关闭，true：开启；当开启后会再控制台打印执行的sql语句，这样对性能有一定的损耗（不建议在产品环境下开启）
     // beego.LoadAppConfig("ini", "conf/app2.conf") // 加载用户自定义配置文件，默认：conf/app.conf。调用多次，可加载多个配置文件，如果后面的文件和前面的 key 冲突，那么以最新加载的为最新值
 	var str = "欧欧欧";
 	abcP.Wl(str);
@@ -31,18 +34,19 @@ func main() {
 	
 	// 注册一个请求过滤函数，在路由之前
 	// _ = beego.InsertFilter("/*", beego.BeforeRouter, FilterUserLogin); // 丢弃掉返回值，_= 也可以不写。 特别注意了，有返回值的函数不能写在函数外
-	// beego.SetLogger("file", `{"filename":"/data/logs/go/beegoStudy.log"}`); // 设置日志文件路径，这样设置后，既会再控制台打印信息，又会把log写入文件
-	beego.Debug("this is debug"); // 返回：2018/09/10 21:58:29.402 [D] [main.go:32] this is debug  （深蓝底色黑色字）
-	beego.Alert("this is alert"); // 返回：2018/09/10 22:00:15.540 [A] [main.go:33] this is alert （浅蓝色）
-    beego.Informational("this is informational"); // 返回：2018/09/10 22:10:16.161 [I] [main.go:34] this is informational （蓝色）
-    beego.Emergency("this is emergency"); // 返回：2018/09/10 22:10:16.161 [M] [main.go:35] this is emergency （白色）
-	beego.Critical("this is critical"); // 返回：2018/09/10 22:10:16.161 [C] [main.go:36] this is critical （紫色）
-    beego.Error("this is error"); // 返回：2018/09/10 22:05:38.845 [E] [main.go:37] this is error （红色）
-    beego.Warning("this is warning"); // 返回：2018/09/10 22:10:16.161 [W] [main.go:38] this is warning （黄色）
-    beego.Notice("this is notice", " ou阳海雄", 35); // 返回：2018/09/10 22:06:22.349 [N] [main.go:39] this is notice （绿色）也可以打印多个变量
+	// beego.SetLogger("file", `{"filename":"/data/logs/go/beegoStudy.log"}`); // 设置日志文件路径，这样设置后，既会在控制台打印信息，又会把log写入文件;
+	// 如果只想输出到文件，就需要调用删除操作：beego.BeeLogger.DelLogger("console")
+	// beego.Debug("this is debug"); // 返回：2018/09/10 21:58:29.402 [D] [main.go:32] this is debug  （深蓝底色黑色字）
+	// beego.Alert("this is alert"); // 返回：2018/09/10 22:00:15.540 [A] [main.go:33] this is alert （浅蓝色）
+    // beego.Informational("this is informational"); // 返回：2018/09/10 22:10:16.161 [I] [main.go:34] this is informational （蓝色）
+    // beego.Emergency("this is emergency"); // 返回：2018/09/10 22:10:16.161 [M] [main.go:35] this is emergency （白色）
+	// beego.Critical("this is critical"); // 返回：2018/09/10 22:10:16.161 [C] [main.go:36] this is critical （紫色）
+    // beego.Error("this is error"); // 返回：2018/09/10 22:05:38.845 [E] [main.go:37] this is error （红色）
+    // beego.Warning("this is warning"); // 返回：2018/09/10 22:10:16.161 [W] [main.go:38] this is warning （黄色）
+    // beego.Notice("this is notice", " ou阳海雄", 35); // 返回：2018/09/10 22:06:22.349 [N] [main.go:39] this is notice （绿色）也可以打印多个变量
 	// 上面是打印的日志，默认打印到控制台（console）
     // 如果只想输出到文件，就需要调用删除操作：beego.BeeLogger.DelLogger("console")
-	// beego.SetLogFuncCall(true) 是否输出调用的文件名和文件行号；默认false:关闭，true：开启
+	// beego.SetLogFuncCall(true) 是否输出调用的文件名和文件行号；false:关闭，默认true：开启
 
     logs.SetLogger(logs.AdapterFile, `{"filename":"/data/logs/go/beegoStudy_logs.log", "level":7, "maxlines":0, "maxsize":2097152, "daily":true, "maxdays":20}`);
 	// filename : 保存的文件路径
@@ -54,7 +58,7 @@ func main() {
 	// rotate : 是否开启日记管理，默认true
     // perm : 日志文件权限
     logs.EnableFuncCallDepth(true); // logs日志默认输出调用的文件名和文件行号；默认true：开启，false：关闭
-	logger();
+	// logger();
 
     // beego.ErrorHandler("404", page_not_found); // 设置自定义404处理页面。注意后面的参数是函数名，并非字符串类型
 	// beego.ErrorHandler("dbError", dbError);
@@ -101,4 +105,25 @@ func dbError(rw http.ResponseWriter, r *http.Request) {
 	data["content"] = "database is now down";
 	// beego.Info(data["content"]);
 	t.Execute(rw, data);
+}
+
+func init() { // init 应用启动时执行一次
+	beego.Info("===================++++++++++++++++++++++++++++++++++++++++++++++++++=================================");
+	// orm.RegisterDriver("postgres", orm.DRPostgres); // 注册一个数据库驱动，默认：mysql / sqlite3 / postgres 这三种驱动已经注册过的，所以可以无需设置
+	// 第一个参数为：驱动名（driverName）； 第二个参数为数据库类型
+	// orm.RegisterDataBase("default", "mysql", "username:password@tcp(127.0.0.1:3306)/db_name?charset=utf8", 30); // set default database （如果是mysql的话）
+    // 使用驱动时，需要包含驱动的包文件如：mysql-> _ "github.com/go-sql-driver/mysql"; // import your used driver
+	err := orm.RegisterDataBase("default", "postgres", "postgres://root:123456@172.17.10.253:5432/testdb?sslmode=disable", 30); // only "require" (default), "verify-full", "verify-ca", and "disable" supported
+	// register db Ping `default`, pq: no pg_hba.conf entry for host "172.17.10.253", user "root", database "testdb", SSL off 当出现这个错误时，需要：vim /var/lib/pgsql/data/pg_hba.conf 加入
+	// host    all             all             172.17.10.253/32        trust
+	// err := orm.RegisterDataBase("default", "postgres", "postgres://root:123456@127.0.0.1:5432/testdb?sslmode=disable", 30); ORM 必须注册一个别名为 default 的数据库，作为默认使用。
+	// &charset=utf8 这个参数无法识别（不知道为什么，可能是在postgres中是不需要的，在mysql中是需要的）。 ORM 使用 golang 自己的连接池
+	// 参数1：数据库的别名，用来在 ORM 中切换数据库使用； 参数2：driverName（驱动名，也是注册驱动时第一个参数）； 参数3：对应的链接字符串
+    // 参数4（可选）：最大空闲链接； 参数5（可选）：最大数据库链接数。这两个参数可以通过orm.SetMaxIdleConns("default", 30)、orm.SetMaxOpenConns("default", 30) 来动态改变
+    if err != nil {
+		beego.Error("连接数据库出错了：", err); // connect postgresql error 
+		return;
+	}
+
+    orm.RunSyncdb("default", false, true); // create table   当表不存在时，自动进行创建，仅在程序启动时进行检测。 创建连接 orm.RegisterDataBase 和自动建表 orm.RunSyncdb 代码要在同级模块下。
 }

@@ -57,5 +57,5 @@ func init() {
 
     beego.ErrorController(&controllers.ErrorController{}); // 注册错误处理控制器
 
-
+    beego.AutoRouter(&controllers.DbController{});
 }

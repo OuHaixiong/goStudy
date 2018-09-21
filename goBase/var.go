@@ -24,6 +24,9 @@ func main() { // := 为赋值操作符
     println(x, y, a, b, c, d, e, f, g, h, i);
     println("a的内存地址是：", &a); // 字符串不能用单引号，使用后报错： invalid character literal (more than one character)
     
+    var str string;
+    str = `这就是一个字符串，还支持多行呢`;
+    println(str);
 }
 
 // 指针:指的是这个变量的值是一个内存地址
