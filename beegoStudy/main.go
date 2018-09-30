@@ -108,9 +108,8 @@ func dbError(rw http.ResponseWriter, r *http.Request) {
 }
 
 func init() { // init 应用启动时执行一次
-	beego.Info("===================++++++++++++++++++++++++++++++++++++++++++++++++++=================================");
 	// orm.RegisterDriver("postgres", orm.DRPostgres); // 注册一个数据库驱动，默认：mysql / sqlite3 / postgres 这三种驱动已经注册过的，所以可以无需设置
-	// 第一个参数为：驱动名（driverName）； 第二个参数为数据库类型
+	// 第一个参数为：驱动名（driverName）； 第二个参数为数据库类型：orm.DRMySQL
 	// orm.RegisterDataBase("default", "mysql", "username:password@tcp(127.0.0.1:3306)/db_name?charset=utf8", 30); // set default database （如果是mysql的话）
     // 使用驱动时，需要包含驱动的包文件如：mysql-> _ "github.com/go-sql-driver/mysql"; // import your used driver
 	err := orm.RegisterDataBase("default", "postgres", "postgres://root:123456@172.17.10.253:5432/testdb?sslmode=disable", 30); // only "require" (default), "verify-full", "verify-ca", and "disable" supported
@@ -119,7 +118,7 @@ func init() { // init 应用启动时执行一次
 	// err := orm.RegisterDataBase("default", "postgres", "postgres://root:123456@127.0.0.1:5432/testdb?sslmode=disable", 30); ORM 必须注册一个别名为 default 的数据库，作为默认使用。
 	// &charset=utf8 这个参数无法识别（不知道为什么，可能是在postgres中是不需要的，在mysql中是需要的）。 ORM 使用 golang 自己的连接池
 	// 参数1：数据库的别名，用来在 ORM 中切换数据库使用； 参数2：driverName（驱动名，也是注册驱动时第一个参数）； 参数3：对应的链接字符串
-    // 参数4（可选）：最大空闲链接； 参数5（可选）：最大数据库链接数。这两个参数可以通过orm.SetMaxIdleConns("default", 30)、orm.SetMaxOpenConns("default", 30) 来动态改变
+    // 参数4（可选）：最大空闲链接； 参数5（可选）：	。这两个参数可以通过orm.SetMaxIdleConns("default", 30)、orm.SetMaxOpenConns("default", 30) 来动态改变
     if err != nil {
 		beego.Error("连接数据库出错了：", err); // connect postgresql error 
 		return;
