@@ -28,7 +28,7 @@ type Article struct { // 表有id，title，member_id三个字段
 type Tag struct {
 	Id       int
 	Name     string
-	// Articles []*Article `orm:"reverse(many)"` // reverse 都是可以省略的
+	Articles []*Article `orm:"reverse(many)"` // reverse 都是可以省略的。如果省略掉的话，在关系查询中无法反向进行查找
 }
 
 func init() {

@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"github.com/astaxie/beego";
 	"beegoStudy/models";
-    "github.com/astaxie/beego/orm";
+	"github.com/astaxie/beego/orm";
+	// "strings"
 );
 
 type DbController struct {
@@ -75,7 +76,7 @@ func (c *DbController) Test() {
     c.Ctx.WriteString("It is OK!"); // 输出字符串
 }
 
-// 下面测试表与表之间的关系
+// 下面测试表与表之间的关系，同时进行关系查询
 func (c *DbController) Relation() {
 	/*o := orm.NewOrm(); // 创建Ormer对象
 	o.Using("default"); // 默认使用default（可省略），你也可以指定为其他数据库
@@ -107,7 +108,7 @@ func (c *DbController) Relation() {
 	// article.Tags = tags;
 	fmt.Println(o.Insert(article));*/
 
-	db, err := orm.GetDB();
+	/*db, err := orm.GetDB();
     if (err != nil) {
         fmt.Println("get default DataBase error");
 	} else {
@@ -116,10 +117,125 @@ func (c *DbController) Relation() {
 	db, err = orm.GetDB("alias");
 	if err != nil {
 		fmt.Println("get alias DataBase error:", err); // get alias DataBase error: DataBase of alias name `alias` not found
-	}
+	}*/
 
 	// o2 := orm.NewOrm()
 	// o2.Using("db2") // 切换数据库。默认使用 default 数据库，无需调用 Using
+
+	// 下面演示关系查询
+	/*o := orm.NewOrm();
+	member := models.Member{Id:2}; // 注意这样的写法和new的写法是一样的，只不过在read传参时需要传引用，即:o.Read(&xx)
+	err := o.Read(&member); // [SELECT "id", "name", "profile_id" FROM "member" WHERE "id" = $1 ] - `2`
+	if (err == nil) {
+		println(member.Name);
+		if member.Profile != nil { // println(member.Profile) // 0xc42026a3e0
+			// Member 和 Profile 是 OneToOne 的关系
+			o.Read(member.Profile); // [SELECT "id", "age" FROM "profile" WHERE "id" = $1 ] - `2`
+			println(member.Profile.Age); 
+		}
+	} else {
+        println("不存在的记录");
+	}*/
+	// if (err == orm.ErrNoRows) { // 如果记录不存在，还可以这样写
+	// 	println("不存在的记录");
+	// }
+
+	// 直接关联查询
+	/*o := orm.NewOrm();
+	member := models.Member{}; // 后面的{}一定不能少；相当于 var member models.Member;
+	o.QueryTable("member").Filter("Id", 1).RelatedSel().One(&member); // Filter中查找的字段大小写均可。  .One(&xxx)参数一定只能按引用传递
+	// 通过RelatedSel直接进行连表查询：
+	// [SELECT T0."id", T0."name", T0."profile_id", T1."id", T1."age" FROM "member" T0 INNER JOIN "profile" T1 ON T1."id" = T0."profile_id" WHERE T0."id" = $1 LIMIT 1] - `1`
+	println(member.Profile.Age); // 自动查询到 Profile
+    println(member.Profile.Member.Name); // 因为在 Profile 里定义了反向关系的 User，所以 Profile 里的 User 也是自动赋值过的，可以直接取用。 */
+
+	/*var profile models.Profile;
+	o := orm.NewOrm();
+	// Filter 字段筛选，大小写均可
+	err := o.QueryTable("profile").Filter("Member__Id", 1).One(&profile); // 通过 Member 反向查询 Profile
+	// [SELECT T0."id", T0."age" FROM "profile" T0 INNER JOIN "member" T1 ON T1."profile_id" = T0."id" WHERE T1."id" = $1 LIMIT 1] - `1`
+	if (err == nil) {
+		println(profile.Age)
+		// fmt.Println(profile); // {1 30 <nil>}
+	}*/
+	
+	/*o := orm.NewOrm();
+	var articles []models.Article;
+	// Article 和 Member 是 ManyToOne 关系，也就是 ForeignKey(外键) 为 Member
+	num, err := o.QueryTable("article").Filter("Member", 3).RelatedSel().All(&articles);
+	// [SELECT T0."id", T0."title", T0."member_id", T1."id", T1."name", T1."profile_id", T2."id", T2."age" FROM "article" T0 
+	// INNER JOIN "member" T1 ON T1."id" = T0."member_id" INNER JOIN "profile" T2 ON T2."id" = T1."profile_id" WHERE T0."member_id" = $1 LIMIT 1000] - `3`
+    if err == nil {
+		fmt.Printf("%d member read \n", num);
+        for _, article := range articles {
+			fmt.Printf("Id: %d, Title: %s, Name:%s \n", article.Id, article.Title, article.Member.Name);
+		}
+	}*/
+
+	// 同理 根据 Article.Title 也可以查询对应的 Member
+	/*var member models.Member;
+	o := orm.NewOrm();
+	err := o.QueryTable("member").Filter("Article__Title", "欧妍妍发布的文章标题").Limit(1).One(&member);
+	// [SELECT T0."id", T0."name", T0."profile_id" FROM "member" T0 INNER JOIN "article" T1 ON T1."member_id" = T0."id" WHERE T1."title" = $1 LIMIT 1] - `欧妍妍发布的文章标题`
+	if err == nil {
+		fmt.Println(member); // {3 欧妍妍 0xc420342b00 []}
+	}*/
+
+	// 下面演示多对多的关系（ManyToMany）【orm:"rel(m2m)"】
+	/*o := orm.NewOrm();
+	var articles []*models.Article;
+	num, err := o.QueryTable("Article").Filter("tags__tag__name", "标签名").All(&articles); // .QueryTable()和.Filter() 的字段名可以大写也可以小写
+	// [SELECT T0."id", T0."title", T0."member_id" FROM "article" T0 INNER JOIN "article_tags" T1 ON T1."article_id" = T0."id" 
+	// INNER JOIN "tag" T2 ON T2."id" = T1."tag_id" WHERE T2."name" = $1 LIMIT 1000] - `标签名`
+    if (err == nil) {
+		println(num);
+		for k, v := range articles {
+			println(k, ": ", v.Id, " => ", v.Title) // 0 :  1  =>  欧妍妍发布的文章标题
+		}
+	} else { // 只有执行的sql出错了，才会到这来，不然不会到这来
+		println("no records, num is:", num);
+	}*/
+	// 同理，也可以通过Article的title来查找tag
+	/*o := orm.NewOrm();
+	var tags []*models.Tag;
+	num, err := o.QueryTable("tag").Filter("Articles__Article__Title", "欧妍妍发布的文章标题").All(&tags);
+	// [SELECT T0."id", T0."name" FROM "tag" T0 INNER JOIN "article_tags" T1 ON T1."tag_id" = T0."id" 
+	// INNER JOIN "article" T2 ON T2."id" = T1."article_id" WHERE T2."title" = $1 LIMIT 1000] - `欧妍妍发布的文章标题`
+    if err == nil {
+		println(num);
+		for _, value := range tags {
+			println(value.Name);
+		}
+	}*/
+
+	// 下面是多对多（ManyToMany）关系载入
+	/*o := orm.NewOrm();
+	article := models.Article{Id:1};
+	err := o.Read(&article); // [SELECT "id", "title", "member_id" FROM "article" WHERE "id" = $1 ] - `1`
+	if (err == nil) {
+		num, err := o.LoadRelated(&article, "Tags"); // 载入相应的 Tags
+		// [SELECT T0."id", T0."name" FROM "tag" T0 INNER JOIN "article_tags" T1 ON T1."tag_id" = T0."id" WHERE T1."article_id" = $1 LIMIT 1000] - `1`
+		if err == nil {
+			println(num);
+			for _, tag := range article.Tags {
+				println(tag.Name);
+			}
+		}
+	}*/
+	// 同理也可以通过tag查找article
+	o := orm.NewOrm();
+	tag := models.Tag{Id:2};
+	err := o.Read(&tag); // [SELECT "id", "name" FROM "tag" WHERE "id" = $1 ] - `2`
+	if err == nil {
+		num, err := o.LoadRelated(&tag, "Articles"); // LoadRelated 用于载入模型的关系字段，包括所有的 rel/reverse - one/many 关系
+		// [SELECT T0."id", T0."title", T0."member_id" FROM "article" T0 INNER JOIN "article_tags" T1 ON T1."article_id" = T0."id" WHERE T1."tag_id" = $1 LIMIT 1000] - `2`
+		if (err == nil) {
+			println(num);
+			for k, v := range tag.Articles {
+				println(k, " => ", "id:", v.Id, ", title:", v.Title); // 1  =>  id: 2 , title: 文章标题2
+			}
+		}
+	}
 
     c.Ctx.WriteString("OK!!!!");
 }
@@ -189,7 +305,7 @@ func (c *DbController) Insert() {
         fmt.Println("插入数据失败，Error:", err);
 	}*/
 
-    users := []models.User{
+    /*users := []models.User{
 		{Name:"Bear01", Email:"xx1@bb.com"},
 		{Name:"Bear02"},
 		{Name:"Bear03", Email:"xx3@bb.com"},  // 这里的逗号不能少，少了默认就是分号（;）了，语法就错了
@@ -202,9 +318,39 @@ func (c *DbController) Insert() {
 		fmt.Println("插入多条数据失败，Error：", err);
 	} else {
         fmt.Println("成功插入 ", successNumbers, " 条数据");
-	}
+	}*/
 
-	
+	// 下面演示多对多关系的插入
+	/*o := orm.NewOrm();
+	article := models.Article{Id:2};
+	m2m := o.QueryM2M(&article, "Tags"); // 创建一个 QueryM2Mer 对象. 第一个参数的对象，主键必须有值, 第二个参数为对象需要操作的 M2M 字段
+	tags := []*models.Tag{
+		{Name:"名称1"},
+		{Name:"名称2"},
+	};
+	for _, v := range tags {
+		o.Insert(v); // [INSERT INTO "tag" ("name") VALUES ($1) RETURNING "id"] - `名称1`
+		// o.Insert(&v);  // 不能这样写
+	}
+	num, err := m2m.Add(tags); // 多对多关系的添加，也可以写成：m2m.Add(tag1, tag2)。 Add 支持多种类型 Tag *Tag []*Tag []Tag []interface{}
+	// [INSERT INTO "article_tags" ("article_id", "tag_id") VALUES ($1, $2), ($3, $4)] - `2`, `5`, `2`, `6`
+	if err == nil {
+		fmt.Println("Added numbs:", num);
+	}*/
+
+	o := orm.NewOrm();
+	article := models.Article{Id:2};
+	m2m := o.QueryM2M(&article, "Tags");
+	nums, err := m2m.Count(); // 计算多对多数量： [SELECT COUNT(*) FROM "article_tags" T0 WHERE T0."article_id" = $1 ] - `2`
+	if (err == nil) {
+        fmt.Println("Total Numbs:", nums);
+	}
+	numbers, err := m2m.Clear(); // 清除所有多对多关系
+	// [SELECT T0."id" FROM "article_tags" T0 WHERE T0."article_id" = $1 ] - `2`
+	// [DELETE FROM "article_tags" WHERE "id" IN ($1, $2, $3)] - `3`, `4`, `5`
+	if err == nil {
+		fmt.Println("Removed Tag Numbers:", numbers);
+	}
 
     c.Ctx.WriteString("测试db插入");
 }
@@ -253,7 +399,20 @@ func (c *DbController) Delete() {
     // [SELECT T0."id" FROM "post" T0 WHERE T0."user_id" IN ($1) ] - `10`
 	fmt.Printf("Affected line num: %s, Error: %s \n", num, err); // Affected line num: %!s(int64=1), Error: %!s(<nil>) 
 
-
+	// 下面演示多对多关系删除
+	/*tags := [] *models.Tag{
+		{Id:5},
+		{Id:6},
+	};
+	o := orm.NewOrm();
+	article := models.Article{Id:2};
+	m2m := o.QueryM2M(&article, "Tags");
+	num, err := m2m.Remove(tags); 
+	// [SELECT T0."id" FROM "article_tags" T0 WHERE T0."article_id" = $1 AND T0."tag_id" IN ($2, $3) ] - `2`, `5`, `6`
+	// [DELETE FROM "article_tags" WHERE "id" IN ($1, $2)] - `6`, `7`
+	if (err == nil) {
+        fmt.Println("Removed nums:", num); // Removed nums: 2
+	}*/
 
 	c.Ctx.WriteString("测试db删除");
 }
@@ -261,7 +420,7 @@ func (c *DbController) Delete() {
 // 高级查询。测试 ORM 以 QuerySeter 来组织查询
 func (c *DbController) Query_seter() {
 	o := orm.NewOrm();
-	querySeter := o.QueryTable("member"); // orm.QueryTable(表名) ； 也可以直接使用对象做表名，如：u := new(models.User);o.QueryTable(u)
+	// querySeter := o.QueryTable("member"); // orm.QueryTable(表名) ； 也可以直接使用对象做表名，如：u := new(models.User);o.QueryTable(u)
 	// var m models.Member;
 
 	// err := querySeter.Filter("name", "熊熊").One(&m, "Name", "Id"); // 条件查询:SELECT T0."name" FROM "member" T0 WHERE T0."name" = $1 LIMIT 1
@@ -319,9 +478,12 @@ func (c *DbController) Query_seter() {
 	// QuerySeter.Limit(limit, offset) 默认select查询的最大行数为1000；如果为Limit(-1)即为没有limit（no limit）。也可以单独设置offset：.Offset(20) LIMIT 1000 OFFSET 20
 	// 分组用QuerySeter.GroupBy("id", "age"); GROUP BY id,age
 
-	var members []*models.Member;
+    // Exclude起到 排除条件 的作用，即相反，如：qs.Exclude("profile__id__exact", 8) 即 not profile.id=8 或 profile.id<>8
+
+	/*var members []*models.Member;
 	num, err := querySeter.OrderBy("-profile__age", "id").Limit(88).All(&members, "id", "Name", "profile"); // 需要查询的字段，大小写均可
 	// SELECT T0."id", T0."name" FROM "member" T0 INNER JOIN "profile" T1 ON T1."id" = T0."profile_id" ORDER BY T1."age" DESC, T0."id" ASC LIMIT 88]
+	// OrderBy() - 开头表示降序（DESC），反之没有表示升序（ASC）
 	println("Number:", num, "; Error:", err); // Number: 3 ; Error: (0x0,0x0)
 	for k, v := range members {
 		println(k);
@@ -329,8 +491,43 @@ func (c *DbController) Query_seter() {
 	}
 
 	exists := o.QueryTable("user").Filter("name", "欧海雄007").Exist(); // [ SELECT COUNT(*) FROM "user" T0 WHERE T0."name" = $1 ] - `欧海雄007`
-    fmt.Printf("Is exists: %s \n", exists); // Is exists: %!s(bool=true)
+    fmt.Printf("Is exists: %s \n", exists); // Is exists: %!s(bool=true)*/
 
+	// Distinct 去重（SELECT DISTINCT...）
+
+	var maps []orm.Params;
+	num, err := o.QueryTable("member").Values(&maps, "id", "name","profile","profile__age"); 
+	// .Values() 返回结果集的 key => value 值，key 为 Model 里的 Field name，value 的值 以 string 保存
+	if err == nil {
+		fmt.Printf("Result Numbers: %d \n", num);
+        for k, v := range maps {
+			fmt.Println(k, "===>", v["Id"], v["Name"], v["Profile"], v["Profile__Age"]); // map 中的数据都是展开的，没有复杂的嵌套
+			// 1 ===> 2 欧阳海雄 <nil> 35  特别注意：上面的字段必须大写。没有profile这个字段
+		}
+	}
+
+	var lists []orm.ParamsList // .ValuesList() 和 .Values() 的区别是，.Values()的key是字段名，而.ValuesList()的key为数字
+	number, err := o.QueryTable("member").ValuesList(&lists, "id", "name", "profile__age")
+	if err == nil {
+		fmt.Printf("Result Numbers: %d \n", number) //  Result Numbers: 3
+		for _, row := range lists {
+			// fmt.Printf("Name: %s， Age: %s\n", row[1], row[2]) // Name: 欧阳海雄， Age: %!s(int64=35)  类型不对时才返回这样
+			fmt.Printf("Name: %s， Age: %d \n", row[1], row[2]) // Name: 欧阳海雄， Age: 35
+		}
+	}
+
+	var list orm.ParamsList;
+	n, err := o.QueryTable("user").ValuesFlat(&list, "name"); // 这里只允许传两个参数
+	if err == nil {
+		fmt.Printf("Result Numbs: %d \n", n);
+		// fmt.Printf("All name and id is : %s \n", strings.Join(list, ", ")); // 这里有问题，不知道怎么才能显示
+		// for _, l := range list {
+			// println(list[0]);
+		// }
+	}
+
+	// str := []string{"Hello", "World", "Good"}
+    // fmt.Println(strings.Join(str, " ")) // 连接成字符串时，数组的每一项必须是字符串
 
     c.Ctx.WriteString("测试db高级查询");
 }

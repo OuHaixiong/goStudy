@@ -33,6 +33,8 @@ github.com
 gobaselib
 golang.org
 YBUpload
+cloud.google.com
+google.golang.org
 
 beegoStudy/routers/commentsRouter*
 beegoStudy/static/upload
