@@ -3,3 +3,5 @@
 3，将 /usr/local/go/bin 目录添加至PATH环境变量：export PATH=$PATH:/usr/local/go/bin （其实这样只是在当前的环境下可以用，一旦重启后是不能用的，如果想要可以用需要刷新path）
        最简单的办法就是做个软连接即可： ln -s /usr/local/go/bin/go /usr/bin/go
 4，至此，已安装完毕，可以通过：go run /xxx/XXX.go 来运行go程序
+
+第三方包安装：go get gopkg.in/mailgun/mailgun-go.v1

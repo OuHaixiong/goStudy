@@ -54,7 +54,7 @@ func (c *DbController) Test() {
 	}
 
     o = orm.NewOrm();
-	var maps []orm.Params; // 下面是通过orm执行sql
+	var maps []orm.Params; // 下面是通过orm执行sql（原生查询）
 	num, err = o.Raw(`select u.*,p.title from "user" u, "post" p where p."user_id"=u."id"`).Values(&maps); // inner join  连表查询，注意表名最好用""括起来
     for key, term := range maps {
 		fmt.Printf("%d => %v", key, term); // 返回map结构的数据：1 => map[id:1 name:欧阳海雄 email:Bear@maimengmei.com title:hehe]
@@ -530,4 +530,55 @@ func (c *DbController) Query_seter() {
     // fmt.Println(strings.Join(str, " ")) // 连接成字符串时，数组的每一项必须是字符串
 
     c.Ctx.WriteString("测试db高级查询");
+}
+
+// 原生sql执行
+func (c *DbController) Protosomatic() {
+	o := orm.NewOrm();
+	var rawSeter orm.RawSeter; // 提倡 rawSeter := 写法
+	rawSeter = o.Raw("update tag set name=? where id=?", "PHP", 3);  // [update tag set name=$1 where id=$2] - `PHP`, `3`
+	// o.Raw("select name from member where id in(?,?,?)", ids)   // ids := []int{1,2,3}
+	res, err := rawSeter.Exec(); // 运行sql语句
+	// RawSeter.Exec() (sql.Result, error) 执行sql语句
+	if err == nil {
+		num, _ := res.RowsAffected();
+		fmt.Println("sql exec row affected nums:", num); // sql exec row affected nums: 1
+	}
+	
+	var tag models.Tag;
+	e := o.Raw("SELECT id, name FROM tag WHERE id = ?", 3).QueryRow(&tag); // .QueryRow(interface{}) error : 查询一条记录，支持struct
+	if e == nil {
+		beego.Info(tag.Id, " => ", tag.Name);
+	}
+
+	var maps []orm.Params;
+	r := o.Raw("select * from member where name=? and profile_id=?");
+	result, err := r.SetArgs("Bear-Ou", 1).Values(&maps);
+	if (err == nil && result > 0) {
+		beego.Info("result:", result); // result: 1
+		for key, item := range maps {
+			beego.Info("key=>", key); // key=> 0
+			beego.Info(item["id"], item["name"]); // 1 Bear-Ou 
+		}
+	}
+	_, error := r.SetArgs("欧阳海雄", "2").Values(&maps); // .SetArgs(arg1,arg2,...) 可重复使用替换参数
+	if error == nil {
+		beego.Info(error); // <nil> 
+		for _, item := range maps { // 在for中，第一个返回值如果舍弃掉，第二个是可以已定义过的，但如果在其他的地方，如直接调用函数返回值的话是不行的
+			beego.Info(item["id"], item["name"]); // 2 欧阳海雄
+		}
+	}
+
+	var list orm.ParamsList;
+	num, err := o.Raw("select id from member where id < ?", 10).ValuesFlat(&list); // .ValuesFlat 返回单一字段数组值
+	if err == nil && num > 0 {
+		beego.Info(list); // [1 2 3 5]
+        for _, id := range list {
+			println(id); // (0x8e02e0,0xc42050c590)
+			fmt.Println(id); // 1
+		}
+		// fmt.Println(strings.Join(list,",")) // 不能这样转换
+	} 
+    // 还有一些原生操作：Prepare、RowsToStruct、RowsToMap 详见：https://beego.me/docs/mvc/model/rawsql.md
+    c.Ctx.WriteString("测试db的原生sql执行");
 }

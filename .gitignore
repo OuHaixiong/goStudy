@@ -32,9 +32,12 @@ Thumbs.db
 github.com
 gobaselib
 golang.org
-YBUpload
 cloud.google.com
 google.golang.org
+YBUpload
+YBay
+gopkg.in
+
 
 beegoStudy/routers/commentsRouter*
 beegoStudy/static/upload
