@@ -154,60 +154,7 @@ func post_yunex(uri string, app_id string, headers map[string]string, data inter
 	return
 }
 
-// func post_yunex2(uri string, app_id string, headers map[string]string, data interface{}, datakey string, datastu interface{}, notuserproxy bool, timeout time.Duration)(err error){
-// 	if headers == nil {
-// 		headers = make(map[string]string)
-// 	}
-// 	headers["Content-Type"] = "application/json"
-// 	headers["x-bitex-ts"] = fmt.Sprintf("%v", time.Now().Unix())
-// 	headers["x-bitex-nonce"] = RandomSample(letters, 12)
-// 	if notuserproxy {
-// 		headers["X-Not-Use-Proxy"] = "true"
-// 	}
-// 	body, _ := json.Marshal(data)
-// 	var signature string
-// 	headers["x-bitex-sign"], signature = signyunex2(string(body), headers["x-bitex-ts"], headers["x-bitex-nonce"])
 
-// 	ret := base.HttpPost(uri, body, headers, timeout)	
-// 	res := okJsonParse(ret.RawBody)
-
-// 	println("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
-// 	println(string(ret.RawBody));
-// 	println(signature);
-// 	println("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
-
-//     if res.Reason != "" {
-// 		println(res.Reason);
-// 	}
-// 	return
-// }
-
-// func get_yunex2(uri string, app_id string, headers map[string]string, data interface{}, datakey string, datastu interface{}, notuserproxy bool, timeout time.Duration)(err error){
-// 	if headers == nil {
-// 		headers = make(map[string]string)
-// 	}
-// 	headers["Content-Type"] = "application/json"
-// 	headers["x-bitex-ts"] = fmt.Sprintf("%v", time.Now().Unix())
-// 	headers["x-bitex-nonce"] = RandomSample(letters, 12)
-// 	if notuserproxy {
-// 		headers["X-Not-Use-Proxy"] = "true"
-// 	}
-// 	r, _ := url.Parse(uri)
-// 	var signature string
-// 	headers["x-bitex-sign"], signature = signyunex2(r.Query().Encode(), headers["x-bitex-ts"], headers["x-bitex-nonce"])
-// 	ret := base.HttpGet(uri, headers, timeout)	
-// 	res := okJsonParse(ret.RawBody)
-
-// 	println("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
-// 	println(string(ret.RawBody));
-// 	println(signature);
-// 	println("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
-
-//     if res.Reason != "" {
-// 		println(res.Reason);
-// 	}
-// 	return
-// }
 
 
 func get_yunex(uri string, app_id string, datakey string, datastu interface{}, notuserproxy bool, timeout time.Duration)(err error){
@@ -283,7 +230,7 @@ func get_yunex(uri string, app_id string, datakey string, datastu interface{}, n
  * 调用yunex的接口
  * @params string method 请求方式，取值：GET、POST
  */
-func RequestYunExApi(uri string, method string, headers map[string]string, data interface{}, datakey string, datastu interface{}, notuserproxy bool, timeout time.Duration) (err error) {
+func RequestYunExApi(uri string, method string, headers map[string]string, data interface{}, datakey string, dataResponse interface{}, notuserproxy bool, timeout time.Duration) (err error) {
 	if headers == nil {
 		headers = make(map[string]string)
 	}
@@ -315,16 +262,41 @@ func RequestYunExApi(uri string, method string, headers map[string]string, data 
 	} else {
 		response = base.HttpGet(uri, headers, timeout)
 	}
-	res := okJsonParse(response.RawBody)
-
-    // TODO 返回接口获取的数据
-	println("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
-	println(string(response.RawBody));
-	println(signString);
-	println("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
-
-    if res.Reason != "" {
-		println(res.Reason);
+	var res *okJson
+	res = okJsonParse(response.RawBody)
+	println("++++++++++++++++++++++++++++++++++++")
+    println(string(response.RawBody))
+	println("++++++++++++++++++++++++++++++++++++")
+    if !res.Ok {
+		glog.Errorf("rquest [%s] failed! reason: %s", uri, res.Reason)
+		switch res.Reason.(type) {
+		case string:
+			err = fmt.Errorf(res.Reason.(string))
+		case int:
+			err = fmt.Errorf("%v", res.Reason.(int))
+		case int64:
+			err = fmt.Errorf("%v", res.Reason.(int64))			
+		default:
+			err = res.Error
+		}
+	} else {
+		if dataResponse != nil {
+			var buf []byte
+			if datakey != "" {
+                buf, err = json.Marshal(res.Data[datakey])
+			} else {
+                buf, err = json.Marshal(res.Data)
+			}
+			if err != nil {
+				glog.Errorf("Marshal(%v) failed! err: %v", res.Data[datakey], err)
+				return
+			}
+			println("buf::::", string(buf));
+			err = jsoniter.Unmarshal(buf, dataResponse)
+			if err != nil {
+				glog.Errorf("getresinfos Unmarshal fail! err=%v buf:[%v]", err, string(buf))
+			}
+		}
 	}
 	return
 }

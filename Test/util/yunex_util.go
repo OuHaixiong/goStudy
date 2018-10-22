@@ -6,6 +6,7 @@ import (
 	"github.com/jie123108/glog"
 	"math/rand"
 	"time"
+	// "encoding/json"
 )
 
 const (
@@ -172,6 +173,8 @@ func BonusYunexKt(vs []YunexKtBonus) (fail []YunexKtBonusRet, err error) {
 	return
 }
 
+
+
 type YunexYbtDeposit struct {
 	Plat string `json:"plat"`
 	Address string `json:"address"`
@@ -179,21 +182,22 @@ type YunexYbtDeposit struct {
 	Amount float64 `json:"amount,string"`
     OrderId int `json:"order_id,string"`
 }
+
+type YunexYbtDepositResponse struct {
+	OrderId string `json:"order_id"`
+	Status int `json:"status"`
+}
+
 // 提币接口（yunbay提YBT币到yunex）
-func RechargeYunExYBt(data YunexYbtDeposit) (dataStatus ReasonSt, err error) {
+func RechargeYunExYBt(data YunexYbtDeposit) (dataResponse YunexYbtDepositResponse, err error) {
 	uri := "http://a.yunex.io/api/pub/user/deposit/"
-	err = RequestYunExApi(uri, "POST", nil, data, "fail", &dataStatus, false, EXPIRE_RES_INFO)
-	if err != nil {
-		glog.Error("/api/pub/user/deposit/ is fail, err:", err)
-	}
+	err = RequestYunExApi(uri, "POST", nil, data, "", &dataResponse, false, EXPIRE_RES_INFO)
     return
 }
+
 // 查询yunbay在yunex中的账号余额
-func GetYunExBalance() (dataStatus ReasonSt, err error) {
+func GetYunExBalance() (balances map[string]string, err error) {
 	uri := "http://a.yunex.io/api/pub/account/balance/?plat=yunbay"
-	err = RequestYunExApi(uri, "GET", nil, nil, "fail", &dataStatus, false, EXPIRE_RES_INFO)
-	if err != nil {
-		glog.Error("/api/pub/account/balance/ is fail, err:", err)
-	}
+	err = RequestYunExApi(uri, "GET", nil, nil, "", &balances, false, EXPIRE_RES_INFO)
     return
 }
