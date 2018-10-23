@@ -632,7 +632,7 @@ func (c *DbController) Query_builder() {
 
 // 事务处理
 func (c *DbController) Transaction() {
-	o := orm.NewOrm()
+	/*o := orm.NewOrm()
 	err := o.Begin()
 	if (err != nil) {
 		beego.Error("begin transaction is error:", err.Error())
@@ -649,7 +649,17 @@ func (c *DbController) Transaction() {
         number, _ := result.RowsAffected();
 		err = o.Commit()
 		fmt.Printf("sql exec row affected numbers: %d \n", number); // sql exec row affected numbers: 4
-	}
+	}*/
+
+	// 下面查看db的信息
+	o := orm.NewOrm()
+	// o.Using("databaseAlias")
+	driver := o.Driver()
+	fmt.Println(driver.Name()) // default
+	driverType := driver.Type() // 4
+	fmt.Println(driverType)
+	fmt.Println(driverType == orm.DRPostgres) // true
+	fmt.Println(driverType == orm.DRSqlite) // false
 
     c.Ctx.WriteString("测试db的事务处理");
 }

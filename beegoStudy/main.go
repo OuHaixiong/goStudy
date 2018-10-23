@@ -111,8 +111,9 @@ func init() { // init 应用启动时执行一次
 	orm.RegisterDriver("postgres", orm.DRPostgres); // 注册一个数据库驱动，默认：mysql / sqlite3 / postgres 这三种驱动已经注册过的，所以可以无需设置
 	// 第一个参数为：驱动名（driverName）； 第二个参数为数据库类型：orm.DRMySQL
 	// orm.RegisterDataBase("default", "mysql", "username:password@tcp(127.0.0.1:3306)/db_name?charset=utf8", 30); // set default database （如果是mysql的话）
-    // 使用驱动时，需要包含驱动的包文件如：mysql-> _ "github.com/go-sql-driver/mysql"; // import your used driver
-	err := orm.RegisterDataBase("default", "postgres", "postgres://root:123456@172.17.10.253:5432/testdb?sslmode=disable", 30); // only "require" (default), "verify-full", "verify-ca", and "disable" supported
+	// 使用驱动时，需要包含驱动的包文件如：mysql-> _ "github.com/go-sql-driver/mysql"; // import your used driver
+	databaseAlias := "default" // 数据库别名
+	err := orm.RegisterDataBase(databaseAlias, "postgres", "postgres://root:123456@172.17.10.253:5432/testdb?sslmode=disable", 30); // only "require" (default), "verify-full", "verify-ca", and "disable" supported
 	// register db Ping `default`, pq: no pg_hba.conf entry for host "172.17.10.253", user "root", database "testdb", SSL off 当出现这个错误时，需要：vim /var/lib/pgsql/data/pg_hba.conf 加入
 	// host    all             all             172.17.10.253/32        trust
 	// err := orm.RegisterDataBase("default", "postgres", "postgres://root:123456@127.0.0.1:5432/testdb?sslmode=disable", 30); ORM 必须注册一个别名为 default 的数据库，作为默认使用。
@@ -124,5 +125,6 @@ func init() { // init 应用启动时执行一次
 		return;
 	}
 
-    orm.RunSyncdb("default", false, true); // create table   当表不存在时，自动进行创建，仅在程序启动时进行检测。 创建连接 orm.RegisterDataBase 和自动建表 orm.RunSyncdb 代码要在同级模块下。
+    orm.RunSyncdb(databaseAlias, false, true); // create table   当表不存在时，自动进行创建，仅在程序启动时进行检测。 创建连接 orm.RegisterDataBase 和自动建表 orm.RunSyncdb 代码要在同级模块下。
+    // 第二个参数为true时，表示drop table 后再建表；第三个参数为true时，表示打印执行过程
 }
