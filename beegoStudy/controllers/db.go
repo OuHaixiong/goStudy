@@ -550,6 +550,17 @@ func (c *DbController) Protosomatic() {
 	if e == nil {
 		beego.Info(tag.Id, " => ", tag.Name);
 	}
+	// 如果查询所有的话，可以用.QueryRows；如：
+	// type User struct {
+	// 	Id       int
+	// 	UserName string
+	// }
+	// var users []User
+	// num, err := o.Raw("SELECT id, user_name FROM user WHERE id = ?", 1).QueryRows(&users)
+	// if err == nil {
+	// 	fmt.Println("user nums: ", num)
+	// }
+	
 
 	var maps []orm.Params;
 	r := o.Raw("select * from member where name=? and profile_id=?");
@@ -581,4 +592,64 @@ func (c *DbController) Protosomatic() {
 	} 
     // 还有一些原生操作：Prepare、RowsToStruct、RowsToMap 详见：https://beego.me/docs/mvc/model/rawsql.md
     c.Ctx.WriteString("测试db的原生sql执行");
+}
+
+// QueryBuilder (构造查询)
+func (c *DbController) Query_builder() {
+    type User struct { // 结构体是可以写在函数里面的，如果写在里面，那么就只能在函数内使用了
+		Name string
+		Age int
+	}
+
+	var users []User
+    // 我靠竟然只能用mysql，且用mysql生成sql竟然能在postgresql数据库中执行成功
+	queryBuilder, err := orm.NewQueryBuilder("mysql") // 神奇了，我没有注册mysql的驱动，竟然能执行成功。(我猜应该是执行的sql语句是一样的，不然...)
+	// queryBuilder, err := orm.NewQueryBuilder("postgres") // 获取 QueryBuilder 对象. 需要指定数据库驱动参数。
+	if err != nil {
+		beego.Error("无法通过驱动别名生成QueryBuilder对象");
+		beego.Error(err.Error()); // unknown driver for query builder 
+		// postgres query builder is not supported yet
+		c.Ctx.WriteString("获取驱动出错了，无法created query builder；请查看日记");
+		return
+	}
+	// 构建查询对象
+	queryBuilder.Select("member.name", "profile.age").From("member").
+		InnerJoin("profile").On("member.profile_id = profile.id").
+		Where("profile.age > ?").
+		OrderBy("name").Desc().
+		Limit(10).Offset(0)
+	sql := queryBuilder.String() // 导出 SQL 语句
+	// [SELECT member.name, profile.age FROM member INNER JOIN profile ON member.profile_id = profile.id WHERE profile.age > $1 ORDER BY name DESC LIMIT 10 OFFSET 0] - `18`
+	o := orm.NewOrm() // 执行 SQL 语句
+	o.Raw(sql, 11).QueryRows(&users)
+	for k, v := range users {
+		beego.Info(k, "=> ", v.Name, v.Age) // 1 =>  Bear-Ou 30
+	}
+	
+
+    c.Ctx.WriteString("测试db的QueryBuilder查询");
+}
+
+// 事务处理
+func (c *DbController) Transaction() {
+	o := orm.NewOrm()
+	err := o.Begin()
+	if (err != nil) {
+		beego.Error("begin transaction is error:", err.Error())
+		c.Ctx.WriteString("启动事务失败");
+	}
+	sql := "update profile set age=age+1"
+	result, err := o.Raw(sql).Exec();// 运行sql语句
+	if (err != nil) {
+		fmt.Println(err.Error()) // pq: relation "profiles" does not exist
+		err = o.Rollback()
+		fmt.Println(err) // <nil>
+		c.Ctx.WriteString("执行事务失败，已回滚");
+	} else {
+        number, _ := result.RowsAffected();
+		err = o.Commit()
+		fmt.Printf("sql exec row affected numbers: %d \n", number); // sql exec row affected numbers: 4
+	}
+
+    c.Ctx.WriteString("测试db的事务处理");
 }

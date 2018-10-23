@@ -108,7 +108,7 @@ func dbError(rw http.ResponseWriter, r *http.Request) {
 }
 
 func init() { // init 应用启动时执行一次
-	// orm.RegisterDriver("postgres", orm.DRPostgres); // 注册一个数据库驱动，默认：mysql / sqlite3 / postgres 这三种驱动已经注册过的，所以可以无需设置
+	orm.RegisterDriver("postgres", orm.DRPostgres); // 注册一个数据库驱动，默认：mysql / sqlite3 / postgres 这三种驱动已经注册过的，所以可以无需设置
 	// 第一个参数为：驱动名（driverName）； 第二个参数为数据库类型：orm.DRMySQL
 	// orm.RegisterDataBase("default", "mysql", "username:password@tcp(127.0.0.1:3306)/db_name?charset=utf8", 30); // set default database （如果是mysql的话）
     // 使用驱动时，需要包含驱动的包文件如：mysql-> _ "github.com/go-sql-driver/mysql"; // import your used driver
