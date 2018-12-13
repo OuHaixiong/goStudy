@@ -11,6 +11,7 @@ func main() {
     port := ":8000";
     router := gin.Default(); // 注册一个默认的路由器
     router.GET("/", func(c *gin.Context) { // 路由只能全匹配
+        // gin支持所有的HTTP的方法例如: GET, POST, PUT, PATCH, DELETE 和 OPTIONS等
         c.String(http.StatusOK, "<h3>Hello World</h3>"); // 输出字符串<h3>Hello World</h3>（并非html）
         // http.StatusOK = 200
         // c.String() 、 c.JSON() 等，相当于向http的回复缓冲区写入了 一些数据

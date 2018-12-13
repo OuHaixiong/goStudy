@@ -85,5 +85,28 @@ func main() {
     // nil转化为json的null；
     // channel，complex，func等类型是不能被编码成json的，会返回UnsupportedTypeError
 
+    test()
+}
 
+
+// 测试json转go的结构体
+func test() {
+	var binary = []byte(`{"section": [{"end": "21.129.111", "start": "0.00.1"}], "specify": ["78.23.1", "21.129.111", "81.2659.50", "789.1.0"]}`) // []byte:字符串转二进制
+	var m Mandatory;
+	err := json.Unmarshal(binary, &m); // Unmarshal(data []byte, v interface{}) error ： 将json字符串流（二进制）解析为go语言中对应的类型
+	if err != nil {
+        fmt.Println(err.Error())
+	} else {
+		println(m.Section[0].Start)
+	}
+}
+
+type Mandatory struct {
+	Section []SectionStruct
+	Specify []string
+}
+
+type SectionStruct struct {
+	Start string
+	End string
 }

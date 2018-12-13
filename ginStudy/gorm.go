@@ -111,6 +111,20 @@ func main() {
 	var result Result
     db.Raw("select sum(age) as total_age from user_infos where age>=18").Scan(&result);
 	println(result.TotalAge)
+
+	var r Result
+	var u7 UserInfo
+	var db2 *gorm.DB
+	// db2 = db
+	db = db.Table("user_infos").Where("age >= ?", 18)
+	// db2.Table("user_infos").Where("age >= ?", 18).Select("sum(age) as total_age").Scan(&r);
+
+	db2 = db
+	db2.Select("sum(age) as total_age").Scan(&r)
+	db.Offset(0).Limit(1).Find(&u7);
+	println(r.TotalAge)
+	println(u7.ID, u7.Name, u7.Age)
+
 }
 
 type User struct { // 特别注意了：在gorm中，表名和结构体的名称是一样的，如果需要单独返回表名，需要实现TableName方法

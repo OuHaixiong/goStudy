@@ -16,7 +16,8 @@ func main() {
 	// router.Use(gin.Logger()) // 可以使用这种方式来指明中间件
 
 	// 定义模板文件路径
-    router.LoadHTMLGlob("templates/*") // 加载所有的模板文件（视图文件）（一定要这样写）
+	router.LoadHTMLGlob("templates/*") // 加载所有的模板文件（视图文件）（一定要这样写）。  后面的 * 可以用正则匹配
+	// 或者使用这种方法加载也是OK的: router.LoadHTMLFiles("templates/template1.html", "templates/template2.html") 加载指定模板
 
 	/*router.GET("/user/:id", func(c *gin.Context) { // 路由的定义；后面的:id匹配任意字符
 		id := c.Param("id"); // http://172.17.10.253:8000/user/ 这样是会报错的404
@@ -28,7 +29,7 @@ func main() {
 		action := c.Param("action") // 也可以这样写：c.Params.ByHName("XXX")
 		message := name + " is " + action // http://172.17.10.253:8000/user/45/dsfdas/%E4%BD%A0%E5%A5%BD
 		c.String(http.StatusOK, message) // 45 is /dsfdas/你好
-		// : 和 * 的区别是，“:”只包含两个/内的字符，而“*”包括了前面的/和后面的所有字符
+		// : 和 * 的区别是，“:”只包含两个/内的字符，而“*”包括了前面的/和后面的所有字符；且使用“:”是必须要匹配到的，而“*”可以不用匹配上（参数可选）
 	})
 
     router.GET("/welcome", func(c *gin.Context) { // query 能获取 ? 后面的参数
@@ -173,6 +174,17 @@ func main() {
 		})
 	})
 
+	// 测试.tmpl模板文件
+    router.GET("/test/tmpl", func (c *gin.Context) {
+        c.HTML(http.StatusOK, "testTmpl.tmpl", gin.H{ // 返回html
+			"title" : "测试加载tmpl模板", // 特别注意这里的“,”不能省
+		})
+	})
+
+	// 下面测试重定向
+    router.GET("/redirect", func (c *gin.Context) {
+        c.Redirect(http.StatusMovedPermanently, "http://maimengmei.com") // StatusMovedPermanently = 301 (301 Moved Permanently)
+	})
 
 	router.Run(":8000"); // 默认8080
 }

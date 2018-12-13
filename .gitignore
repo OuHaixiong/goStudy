@@ -37,6 +37,8 @@ google.golang.org
 YBUpload
 YBay
 gopkg.in
+YBPay
+Test
 
 
 beegoStudy/routers/commentsRouter*

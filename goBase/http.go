@@ -44,19 +44,20 @@ func main() {
 
     // 下面模拟json格式的post请求
 	// response, err := http.Post("http://127.0.0.1:8080/bindJSON", "application/json", strings.NewReader("{\"user\":\"ouhaixiong\", \"password\":\"123456\"}"))
-	response, err := http.Post("http://127.0.0.1:8080/bindJSON", "application/json", strings.NewReader("{\"user\":\"ouhaixiong\", \"password\":\"12345d6\"}"))
-	if err != nil {
-		println("Error::::", err)
-	}
-	readResponse(response)
+	// response, err := http.Post("http://127.0.0.1:8080/bindJSON", "application/json", strings.NewReader("{\"user\":\"ouhaixiong\", \"password\":123}"))
+	// response, err := http.Post("http://127.0.0.1:8080/bindJSON", "application/json", strings.NewReader("{\"user\":\"ouhaixiong\", \"password\":\"12345d6\"}"))
+	// if err != nil {
+	// 	println("Error::::", err)
+	// }
+	// readResponse(response)
 
 	// 下面模拟form表单post数据
-	response, err = http.Post("http://127.0.0.1:8080/bindForm", "application/x-www-form-urlencoded", strings.NewReader("user=ouhaixiong&password=123456&ddd&ddt="))
+	response, err := http.Post("http://127.0.0.1:8080/bindForm", "application/x-www-form-urlencoded", strings.NewReader("user=ouhaixiong&password=123456&ddd&ddt="))
     if (err != nil) {
-        println("Error::::", err.Error()); // Error:::: Post http://127.0.0.1:8088/bindForm: dial tcp 127.0.0.1:8088: connect: connection refused
+		println("Error::::", err.Error()); // Error:::: Post http://127.0.0.1:8080/bindForm: dial tcp 127.0.0.1:8080: connect: connection refused
+		return
 	}
 	readResponse(response)
-
 
 	response, err = http.Get("http://127.0.0.1:8080/changeJson");
 	readResponse(response);

@@ -6,6 +6,7 @@ import "fmt"
 
 
 func main() {
+    isType();
     var array [5] float32; // 数组声明需要指定元素类型及元素个数
     array[0] = 3.14;
     array[2] = 0.222;
@@ -54,4 +55,19 @@ func getAverage(arr []int) float32 { // 求平均值。 形式参数也可以不
     // avg = float32(sum/size);
     // return avg; // 如果直接就返回出去了，就没有必要多加一个变量进行赋值了
     return float32(sum/size); 
+}
+
+func isType() {
+    // var e interface{}
+    // e[0] = "start"
+    // e[1] = "end"
+
+
+    // switch v := e.(type) {
+    // case int : println("is integer"); break;
+    // case string : println("is string"); break;
+    // default : println("unknown");break;
+    // }
+    var x = []float32 {1000.0, 2.0, 3.4, 7, 50}; // 初始化数组
+    fmt.Printf("x 的类型：%T \n", x);
 }

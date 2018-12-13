@@ -5,7 +5,7 @@ import "fmt"
 
 func main() {
     var countryCapitalMap map[string]string; // 声明一个集合
-    countryCapitalMap = make(map[string]string); // 我靠，这样重复定义都不会报错。 且一定需要这样定义，不让报错：panic: assignment to entry in nil map
+    countryCapitalMap = make(map[string]string); // 我靠，这样重复定义都不会报错。 且一定需要这样定义，不然报错：panic: assignment to entry in nil map
     // 即：如果不初始化 map，那么就会创建一个 nil map。nil map 不能用来存放键值对
     countryCapitalMap["France"] = "Paris"; // 对map插入key-value键值对
     countryCapitalMap["Italy"] = "Rome"; // 各个国家对应的首都

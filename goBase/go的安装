@@ -5,3 +5,9 @@
 4，至此，已安装完毕，可以通过：go run /xxx/XXX.go 来运行go程序
 
 第三方包安装：go get gopkg.in/mailgun/mailgun-go.v1
+
+
+go run xxx.go ： 编译并直接运行程序（会产生一个临时文件）；直接在命令行输出运行结果，方便调试
+go build -o xxx -i ***.go ：打包go应用，会生产一个可执行文件
+go install ： go install 的作用有两步：第一步是编译导入的包文件，所有导入的包文件编译完才会编译主程序；
+              第二步是将编译后生成的可执行文件放到 bin 目录下（$GOPATH/bin），编译后的包文件放到 pkg 目录下（$GOPATH/pkg）
