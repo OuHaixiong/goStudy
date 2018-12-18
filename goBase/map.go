@@ -11,7 +11,7 @@ func main() {
     countryCapitalMap["Italy"] = "Rome"; // 各个国家对应的首都
     countryCapitalMap["Japan"] = "Tokyo";
     countryCapitalMap["India"] = "New Delhi";
-    for key := range countryCapitalMap { // 对map循环，单个变量的话，返回的是key
+    for key := range countryCapitalMap { // 对map循环，单个变量的话，返回的是key。如果range返回值只写一个，代表只需要索引
         fmt.Println("Capital of ", key, " is ", countryCapitalMap[key]); // 特别注意了，这里返回的值是随机的，并不是赋值那样顺序的
     }
     
@@ -45,5 +45,5 @@ func deleteMap() { // 测试删除map中的值
     fmt.Println("删除元素后的map：");
     for country, capital := range countryCapitalMap {
         fmt.Println("Capital of", country, "is", capital);
-    } 
+    }
 }

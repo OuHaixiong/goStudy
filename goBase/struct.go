@@ -18,6 +18,7 @@ func main() {
     book1.book_id = 62018;
     
     book2 := Books{"Go入门", "maimengmei.com", "go语言教程", 60189}; // 声明一个结构体变量并初始化成员属性
+    // 也可以这样写 book2 := Books{title:"haihai"}
     
     fmt.Printf("book1 title=>%s\n", book1.title); // 读取结构体的属性
     fmt.Printf("book1 author=>%s\n", book1.author);

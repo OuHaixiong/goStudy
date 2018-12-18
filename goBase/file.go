@@ -207,6 +207,7 @@ func createTempFile() {
 	} else {
         println("写入的字节数：", length)
 	}
+	// 特别注意了：if后面带的短语句，其中的变量在if结束后生命周期结束。（这里是无法获取到length的）
 	if err := tmpFile.Close(); err != nil { // 关闭文件对象
         log.Fatal("关闭文件句柄出错：", err)
 	}

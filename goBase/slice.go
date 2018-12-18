@@ -41,7 +41,7 @@ func main() {
         fmt.Println(v)
     }
 
-
+    // 注意：一个没有值的切片（slice）为nil，长度和容量都为0
 
 
 }

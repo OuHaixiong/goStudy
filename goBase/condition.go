@@ -16,12 +16,13 @@ func main() {
     
     switch { // switch 的另一种表现形式
         case grade == "A" : fmt.Println("优秀！");
-        case grade == "B", grade == "C" : fmt.Println("良好");
+        case grade == "B", grade == "C" : fmt.Println("良好"); 
         case grade == "D" : fmt.Println("不及格");
         default : fmt.Println("差");
         
     }
-    
+    // switch 也是可以带上短语句的，作用访问也是switch结束后生命周期结束，和if是一样的
+
     fmt.Println("你的等级是：", grade);
     
     typeSwitch();
