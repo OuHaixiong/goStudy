@@ -9,12 +9,14 @@ import (
 	"strings"
 	"os"
 	"path/filepath"
+	"time"
+	// "io/ioutil"
 )
 
 func TestMiddleWare() gin.HandlerFunc { // 定义全局中间件
 	return func(c *gin.Context) {
 		fmt.Println("before middleware")
-		c.Set("qq", "client_request") // 设置传递的参数
+		c.Set("qq", "client_request") // 设置传递的参数。在路由中可以使用c.Get("qq")获得
 		c.Next() // 中间件和路由的处理流程是，先运行中间件，直到遇到c.Next()后会运行路由的代码，完了后会接着运行c.Next()之后的代码
 		fmt.Println("after middleware")
 	}
@@ -57,9 +59,23 @@ func AuthMiddleWare() gin.HandlerFunc { // 定义中间件，模拟验证过程
 	}
 }
 
+func RunTime() gin.HandlerFunc { // 定义一个监控运行时间的中间件
+    return func (c *gin.Context) {
+		t := time.Now() // 获取当前时间，返回如：2018-12-13 01:25:45.933496744 -0500 EST m=+3.825548952
+		fmt.Println("RunTime middleware :: now time :", t);
+		c.Set("example", 123) // 设置example变量到Context的Key中,通过Get等函数可以取得
+		c.Next()
+		latency := time.Since(t) // 获取两个时间的差，返回微秒如：690.646µs
+		log.Print("RunTime middleware :: ", latency) // 这个打印也会换行
+		status := c.Writer.Status() // 这个c.Write是ResponseWriter,我们可以获得状态等信息
+		log.Println("RunTime middleware :: ", status)
+	}
+}
 
 func main() {
 	router := gin.Default()
+
+	router.Use(CORSMiddleware()) // 注册 CORS 跨域请求 中间件
 
     router.GET("/single/test", SingleMiddleWare(), func(c *gin.Context) {
 		fmt.Println("这里是单个控制器开始了：/single/test")
@@ -121,11 +137,13 @@ func main() {
 		// curl -X GET http://127.0.0.1:8080/v1/hehe
     }
 
+    router.Use(RunTime()) // 注册多个全局中间件，执行顺序也是按注册顺序来的
 	v2 := router.Group("/v2")
+	// router.Use(RunTime()) // 写在下面是不行的，一定是需要在路由设置之前设置中间件
     v2.GET("/auth/signin", func(c *gin.Context) { // 这里只应用了全局中间件
         cookie := &http.Cookie{ // 申请cookie对象
 			Name:     "session_id", // cookie 名
-			Value:    "ouyanghaixiong8", // cookie 值
+			Value:    "ouyanghaixiong", // cookie 值
 			Path:     "/", // 保存路径
 			HttpOnly: true, // 是否只读
 		}
@@ -138,8 +156,41 @@ func main() {
 		c.String(http.StatusOK, "v2 login")
 	})
 	v2.GET("/home", func(c *gin.Context) {
+		example := c.MustGet("example").(int) // 注意后面的.(int) 这里的类型要和前面中间件上c.Set的类型一致
+		log.Print("++++ v2 -> home ++++")
+		log.Println(example)
 		c.JSON(http.StatusOK, gin.H{"controller":"/v2/home"})
 	})
+
+    v2.POST("/post-info", func (c *gin.Context) {
+		fmt.Println("++++ v2 -> post-info ++++ start::::")
+		fmt.Println("request method is:", c.Request.Method) // request method is: POST
+		fmt.Println("request host is:", c.Request.Host) // request host is: 172.17.10.253:8080  包括了主机头和端口号
+		fmt.Println("request url is:", c.Request.URL) // request url is: /v2/post-info?abc=abc&name=ouhaixiong&age=30 端口号后面的所有
+		fmt.Println("request ContentLength is:", c.Request.ContentLength) // request ContentLength is: 239
+		contentLength := c.Request.Header.Get("Content-Length")
+		fmt.Printf("request Content-Length by header is %s \n", contentLength) // request Content-Length by header is 239
+		c.Request.ParseForm() // 这句必不可少
+		requestBodyData := c.Request.PostForm // application/x-www-form-urlencoded  POST请求获取form数据
+		fmt.Printf("request body data is : %s \n", requestBodyData) // 如果是 application/x-www-form-urlencoded 请求的话，body内容如：request body data is : map[y:[yanayan] m:[铭铭]] 
+		// requestBody, _ := ioutil.ReadAll(c.Request.Body) // multipart/form-data  POST请求获取body数据
+		// requestBodyData := string(requestBody)
+		// fmt.Printf("request body data is : %s \n", requestBodyData) // 如果是 multipart/form-data 请求的话，body内容如下：
+		/*------------------------------c32bbf69d467
+		Content-Disposition: form-data; name="y"
+		
+		yanayan
+		------------------------------c32bbf69d467
+		Content-Disposition: form-data; name="m"
+		
+		铭铭
+		------------------------------c32bbf69d467--
+		 */
+		requestQueryAll := c.Request.URL.Query() // 获取所有url请求参数；返回map结构
+		fmt.Printf("request url data is : %s \n", requestQueryAll) // request url data is : map[age:[30] abc:[abc] name:[ouhaixiong]] 
+		fmt.Println("++++ v2 -> post-info ++++ end::::")
+	})
+	// curl -X POST --cookie "session_id=ouyanghaixiong" "http://172.17.10.253:8080/v2/post-info?abc=abc&name=ouhaixiong&age=30" -H "Content-Type:multipart/form-data" -F "y=yanayan" -F "m=铭铭"
 
 	// 下面测试静态文件服务
 	// fmt.Println(getCurrentDirectory())
@@ -169,4 +220,21 @@ func getCurrentDirectory() string {
 		log.Fatal(err.Error())
 	}
 	return strings.Replace(dir, "\\", "/", -1) // 将\替换成/
+}
+
+// CORS middleware （CORS 跨域请求中间件）
+func CORSMiddleware() gin.HandlerFunc {
+	return func (c *gin.Context) {
+		log.Print("CORS middleware")
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, X-Yf-Country")
+		if c.Request.Method == "OPTIONS" {
+			// c.Abort(200) // 不能这样写，报错：too many arguments in call to c.Abort
+			//c.Abort() // Abort 固定返回404
+            c.String(http.StatusOK, "OK")
+			log.Print("CORS middleware :: 200")
+			return // 就算这里全局返回了，后面的所有全局中间件还是会执行一遍，只是路由就不会执行
+		}
+		c.Next()
+	}
 }

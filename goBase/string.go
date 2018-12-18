@@ -2,7 +2,11 @@
 package main
 import (
 	"fmt"
-    "strconv"
+	"strconv"
+	"crypto/md5"
+	"crypto/sha1" // Go 在多个 crypto/* 包中实现了一系列散列函数。
+	"encoding/hex"
+    b64 "encoding/base64" // 这个语法引入了 encoding/base64 包, 并使用名称 b64 代替默认的 base64。
 )
 
 func main() {
@@ -25,9 +29,13 @@ func main() {
 
 	// 下面演示数字转字符串
 	var i int = 123
-	ss := strconv.Itoa(i) // 数字转字符串
+	ss := strconv.Itoa(i) // 数字转字符串（int转string）
 	ss = ss + " is string" // 连接两个字符串
 	fmt.Println(ss); // 返回：123 is string
+
+	var i64 int64 = 9887
+    strings := strconv.FormatInt(i64, 10) // int64 转 string
+	fmt.Printf("type: %T, value: %s\n", strings, strings) // type: string, value: 9887
 	
 	// 下面演示任意类型的数据，需要判断处理
 	var e interface{}
@@ -89,6 +97,28 @@ func main() {
 	} else {
         fmt.Println("不是回文");
 	}
+
+	var sstr string = "我是欧海雄！Ou year!"
+	fmt.Println(GetMd5Hash(sstr));
+	fmt.Println(GetSha1Hash(sstr));
+
+	var text string = "abc123!?$*&()'-=@~"
+	var standardEncode string = EncodeBase64(text, true)
+	var urlEncode string = EncodeBase64(text, false)
+	fmt.Println("standard base64 is:", standardEncode) // standard base64 is: YWJjMTIzIT8kKiYoKSctPUB+
+	fmt.Println("URL compatible base64 is:", urlEncode) // URL compatible base64 is: YWJjMTIzIT8kKiYoKSctPUB-
+	decodeString, err := DecodeBase64(standardEncode, true)
+	if (err != nil) {
+		fmt.Println("Base64 Decode fail :", err.Error())
+	} else {
+		fmt.Println("standard base64 decode is:", decodeString)
+	}
+	decodeString, err = DecodeBase64(urlEncode, false)
+    if err != nil {
+		fmt.Println("Base64 Decode fail :", err.Error())
+	} else {
+        fmt.Println("URL Compatible Base64 decode is:", decodeString)
+	}
 }
 
 /**
@@ -117,9 +147,66 @@ func reverseStringV2(s string) string {
 	return string(r)
 }
 
+/**
+ * 获取字符串的md5值
+ * @param string text 输入字符串
+ * @return string 32位的字符串
+ */
+func GetMd5Hash(text string) string {
+	hasher := md5.New()
+	hasher.Write([]byte(text))
+    return hex.EncodeToString(hasher.Sum(nil)) 
+}
 
+/**
+ * 获取字符串的sha1值
+ * @param string text 输入的字符串
+ * @return string 40位的字符串
+ */
+func GetSha1Hash(text string) string {
+	h := sha1.New() // 产生一个散列值的方式是 sha1.New()，sha1.Write(bytes)，然后 sha1.Sum([]byte{})。这里我们从一个新的散列开始。
+	h.Write([]byte(text)) // 写入要处理的字节。如果是一个字符串，需要使用[]byte(s) 来强制转换成字节数组。
+	bs := h.Sum(nil) // 这个用来得到最终的散列值的字符切片。Sum 的参数可以用来都现有的字符切片追加额外的字节切片：一般不需要要。
+    return fmt.Sprintf("%x", bs) // SHA1 值经常以 16 进制输出，例如在 git commit 中。使用%x 来将散列结果格式化为 16 进制字符串。
+}
 
+/**
+ * 对字符串进行base64编码
+ * @param string text 输入的字符串
+ * @return string 24位的字符串
+ * 标准 base64 编码和 URL 兼容 base64 编码的编码字符串存在稍许不同（后缀为 + 和 -; 其实是字符“~”编码后就成“+”），但是两者都可以正确解码为原始字符串
+ */
+func EncodeBase64(text string, isStandard bool) (string) { // 特别注意了：go语言是不支持默认参数和继承（重载）的
+	data := []byte(text) // 编码需要使用 []byte 类型的参数，所以要将字符串转成字节类型。
+	var stringEncode string
+    if isStandard { // 使用标准的base64格式。（Go 同时支持标准的和 URL 兼容的 base64 格式。）
+        stringEncode = b64.StdEncoding.EncodeToString(data) // 标准的和php的base64_encode是一样的，返回类似：YWJjMTIzIT8kKiYoKSctPUB+
+	} else { // 使用 URL 兼容的 base64 格式进行编码。
+        stringEncode = b64.URLEncoding.EncodeToString(data)
+	}
+	return stringEncode
+}
 
-
-
+/**
+ * 对字符串进行base64解码
+ * @param sting text 输入的字符串
+ * @param bool isStandard 是否为标准解码
+ * @return string 返回解码后的字符串
+ */
+func DecodeBase64(text string, isStandard bool) (stringDecode string, err error) {
+	var b []byte
+    if (isStandard) { // 标准的解码和php的base64_decode一样
+		b, err = b64.StdEncoding.DecodeString(text) // 解码可能会返回错误，如果不确定输入信息格式是否正确，那么，你就需要进行错误检查了。
+		if err != nil {
+			return
+		}
+	} else {
+		b, err = b64.URLEncoding.DecodeString(text)
+		if err != nil {
+			return
+		}
+	}
+	stringDecode = string(b)
+    return // 函数结束了一定要写return
+}
 

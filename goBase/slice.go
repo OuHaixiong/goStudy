@@ -3,6 +3,7 @@
 package main
 
 import "fmt"
+import "sort"
 
 func main() {
     var number = make([]int, 3, 5); // 通过内置函数make([]Type, Length[, Capacity])声明一个切片，长度为3，容量为5;Length是数组的长度并且也是切片的初始长度
@@ -31,6 +32,18 @@ func main() {
     print("\n");
     
     appendCopy();
+    
+    // 下面演示切片的排序
+    var keys [] string
+    keys = [] string {"cc", "bac", "abcd", "ab", "xyz"}
+    sort.Strings(keys) // 按字符正序进行排列：ab abcd bac cc xyz
+    for _, v := range keys {
+        fmt.Println(v)
+    }
+
+
+
+
 }
 
 func printSlice(x []int) { // int型的切片差数

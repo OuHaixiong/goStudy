@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	router := gin.Default() // 默认是带有Logger和Recovery中间件的
+	router := gin.Default() // 默认是带有Logger[日志]和Recovery[恢复]中间件的
 	// router := gin.New() // 不带中间件的路由
 	// router.Use(gin.Logger()) // 可以使用这种方式来指明中间件
 
@@ -85,7 +85,8 @@ func main() {
 	}
 	submitEndpoint := func (c *gin.Context) {
         username := c.PostForm("username") // 如果不传，默认就是空字符串
-        password := c.DefaultPostForm("password", "123456")
+		password := c.DefaultPostForm("password", "123456")
+		// requestBodyAll := c.Request.PostForm 获取所有 post data 数据；返回 map[] 类型
         c.JSON(http.StatusOK, gin.H{
 			"status" : "-1",
 			"message" : "This is post login.",
@@ -183,7 +184,8 @@ func main() {
 
 	// 下面测试重定向
     router.GET("/redirect", func (c *gin.Context) {
-        c.Redirect(http.StatusMovedPermanently, "http://maimengmei.com") // StatusMovedPermanently = 301 (301 Moved Permanently)
+		c.Redirect(http.StatusMovedPermanently, "http://maimengmei.com") // StatusMovedPermanently = 301 (301 Moved Permanently) 内部地址可以直接写，如：/home
+		// 302 ： 临时跳转
 	})
 
 	router.Run(":8000"); // 默认8080

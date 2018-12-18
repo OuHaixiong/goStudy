@@ -3,7 +3,10 @@ package main;
 
 import "fmt"
 
-
+// var romanNumeralDict = map[int]string{ // 函数外面声明数组时，要用完整模式
+//     1:"a",
+//     2:"b",
+// }
 
 func main() {
     isType();

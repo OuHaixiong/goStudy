@@ -23,12 +23,20 @@ func main() {
     }
     
     deleteMap();
+
+    // 下面判断map中是否存在某值
+    if v, ok := countryCapitalMap["beijing"]; ok { // 查找键值是否存在
+        fmt.Println(v)
+    } else {
+        fmt.Println("Key Not Found")
+    }
+
 }
 
 func deleteMap() { // 测试删除map中的值
     countryCapitalMap := map[string]string {"France":"Paris", "Italy":"Rome", "Japan":"Tokyo", "India":"New Delhi"}; // 如果初始化了就不需要make
     fmt.Println("原始的map：");
-    for country, capital := range countryCapitalMap {
+    for country, capital := range countryCapitalMap { // map 是无序的
         fmt.Println("Capital of", country, "is", capital);
     }
     

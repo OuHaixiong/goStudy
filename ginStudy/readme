@@ -1,1 +1,8 @@
 安装gin：go get github.com/gin-gonic/gin
+
+gin安装报错
+安装 gin 包时可能会报 x/net 相关错误，可以先下载该必须包：
+$ mkdir -p $GOPATH/src/golang.org/x/
+$ cd $GOPATH/src/golang.org/x/
+$ git clone https://github.com/golang/net.git net
+$ go install net

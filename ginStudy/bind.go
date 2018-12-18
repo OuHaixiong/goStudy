@@ -30,12 +30,13 @@ func main() {
 	router.POST("/login", func (c *gin.Context) {
 		var user User
 		var err error
-		contentType := c.Request.Header.Get("Content-Type")
+		contentType := c.Request.Header.Get("Content-Type") // 获取请求头信息
         fmt.Println("Content-Type::::", contentType)
 		switch contentType {
 		    case "application/json" : err = c.BindJSON(&user)
 			// case "application/x-www-form-urlencoded" : err = c.Bind(&user, binding.Form) // 不能这样写，估计新框架中默认就是form
 			case "application/x-www-form-urlencoded" : err = c.Bind(&user) // 默认使用form解析
+		// case "application/xml" : XXX
 		}
 		if err != nil {
 			fmt.Println(err)
