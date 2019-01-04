@@ -2,11 +2,12 @@
 package main;
 
 import "fmt"
+import "strings"
 
-// var romanNumeralDict = map[int]string{ // 函数外面声明数组时，要用完整模式
-//     1:"a",
-//     2:"b",
-// }
+var romanNumeralDict = map[int]string{ // 函数外面声明数组时，要用完整模式。 且函数外声明的变量可以不使用
+    1:"a", // 在这里，数组下标不是以0开头也不会报错
+    2:"b",
+}
 
 func main() {
     isType();
@@ -44,6 +45,10 @@ func main() {
     // avg = getAverage(intNumber);
     // fmt.Printf("平均值为：%f \n", avg);
     fmt.Printf("平均值为：%f \n", getAverage(intNumber));
+
+    var testArr = []string{"a", "ouhaixiong", "欧欧海雄"}; // 声明一个切片数组
+    testString := arrayToString(testArr, ",")
+    fmt.Println(testString);
 }
 
 // 下面演示形参传递数组
@@ -73,4 +78,14 @@ func isType() {
     // }
     var x = []float32 {1000.0, 2.0, 3.4, 7, 50}; // 初始化数组
     fmt.Printf("x 的类型：%T \n", x);
+}
+
+/**
+ * 数组转字符串（通过一个分隔符，连接数组的值）
+ * @param []string arr 需要转字符串的数组
+ * @param string separate 分隔符
+ * @return string 返回通过分隔符连接在一起的字符串
+ */
+func arrayToString(arr []string, separate string) string {
+    return strings.Replace(strings.Trim(fmt.Sprint(arr), "[]"), " ", separate, -1); // [a b c]=>a b c=>a,b,c
 }
